@@ -1,6 +1,6 @@
 all: report.pdf
 
-report.pdf: report.tex ./graph_1/data.pdf ./graph_1/data_2.pdf ./median/data.pdf ./search/data.pdf ./duplicates/data.pdf
+report.pdf: report.tex ./min_max_average/data.pdf ./min_max_average/data_2.pdf ./median/data.pdf ./search/data.pdf ./duplicates/data.pdf
 	pdflatex -shell-escape report.tex
 
 ./duplicates/data.pdf: ./duplicates/data.dat
@@ -30,14 +30,14 @@ report.pdf: report.tex ./graph_1/data.pdf ./graph_1/data_2.pdf ./median/data.pdf
 ./median/a.out: ./median/main.c
 	gcc ./median/main.c -lm -o ./median/a.out
 
-./graph_1/data_2.pdf: ./graph_1/data.dat
-	gnuplot ./graph_1/plot.p
+./min_max_average/data_2.pdf: ./min_max_average/data.dat
+	gnuplot ./min_max_average/plot.p
 
-./graph_1/data.pdf: ./graph_1/data.dat
-	gnuplot ./graph_1/plot.p
+./min_max_average/data.pdf: ./min_max_average/data.dat
+	gnuplot ./min_max_average/plot.p
 
-./graph_1/data.dat: ./graph_1/a.out
-	./graph_1/a.out > ./graph_1/data.dat
+./min_max_average/data.dat: ./min_max_average/a.out
+	./min_max_average/a.out > ./min_max_average/data.dat
 
-./graph_1/a.out: ./graph_1/main.c
-	gcc ./graph_1/main.c -lm -o ./graph_1/a.out
+./min_max_average/a.out: ./min_max_average/main.c
+	gcc ./min_max_average/main.c -lm -o ./min_max_average/a.out

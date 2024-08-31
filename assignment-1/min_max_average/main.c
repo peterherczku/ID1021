@@ -29,22 +29,6 @@ long bench(int n, int loop) {
     return wall;
 }
 
-int compare(const void *a, const void *b) {
-    long long_a = *(const long*)a;
-    long long_b = *(const long*)b;
-    return (long_a > long_b) - (long_a < long_b);
-}
-
-double findMedian(long arr[], int n) {
-    qsort(arr, n, sizeof(long), compare);
-
-    if (n % 2 == 1) {
-        return arr[n / 2];
-    } else {
-        return (arr[(n - 1) / 2] + arr[n / 2]) / 2.0;
-    }
-}
-
 int main(int argc, char *argv[]) {
     int loop = 1000;
     int k = 10;
@@ -63,23 +47,6 @@ int main(int argc, char *argv[]) {
         printf("%d\t%0.2f\t%0.2f\t%0.2f\n",
                n, (double)min/loop, (double)max/loop, (double)total/loop/k);
     }
-
-    /* for(int i = 0; i < 7; i++) {
-         int n = sizes[i];
-         int loop = 1000;
-         int k = 1000;
-         long min = LONG_MAX;
-
-         long* results = (long*)malloc(sizeof(long)*k);
-         for (int i = 0; i < k; i++) {
-             long wall = bench(n, loop);
-             if (wall < min) min = wall;
-             results[i] = wall;
-         }
-         double median = findMedian(results, k);
-         printf("median time: %0.2f ns/operation \t minimum time: %0.2f ns/operation \n", (double)median/loop, (double)min/loop);
-         free(results); // Don't forget to free allocated memory
-     }*/
 
     return 0;
 }
