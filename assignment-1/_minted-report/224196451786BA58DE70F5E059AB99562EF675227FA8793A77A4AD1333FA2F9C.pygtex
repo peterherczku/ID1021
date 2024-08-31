@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{// ... initialize variables, fill up arrays}
+\PYG{n}{clock\PYGZus{}gettime}\PYG{p}{(}\PYG{n}{CLOCK\PYGZus{}MONOTONIC}\PYG{p}{,}\PYG{+w}{ }\PYG{o}{\PYGZam{}}\PYG{n}{t\PYGZus{}start}\PYG{p}{);}
+\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{loop}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{sum}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{array}\PYG{p}{[}\PYG{n}{idx}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]];}
+\PYG{n}{clock\PYGZus{}gettime}\PYG{p}{(}\PYG{n}{CLOCK\PYGZus{}MONOTONIC}\PYG{p}{,}\PYG{+w}{ }\PYG{o}{\PYGZam{}}\PYG{n}{t\PYGZus{}stop}\PYG{p}{);}
+\end{Verbatim}

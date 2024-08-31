@@ -1,0 +1,24 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{float} \PYG{n+nf}{bench}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{n}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{loop}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+    \PYG{n}{struct} \PYG{n}{timespec} \PYG{n}{t\PYGZus{}start}\PYG{p}{,} \PYG{n}{t\PYGZus{}stop}\PYG{p}{;}
+    \PYG{k+kt}{int} \PYG{o}{*}\PYG{n}{array} \PYG{o}{=} \PYG{p}{(}\PYG{k+kt}{int}\PYG{o}{*}\PYG{p}{)}\PYG{n}{malloc}\PYG{p}{(}\PYG{n}{n}\PYG{o}{*}\PYG{n}{sizeof}\PYG{p}{(}\PYG{k+kt}{int}\PYG{p}{));}
+    \PYG{k}{for} \PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{n}\PYG{p}{;} \PYG{n}{i}\PYG{o}{++}\PYG{p}{)} \PYG{n}{array}\PYG{o}{[}\PYG{n}{i}\PYG{o}{]} \PYG{o}{=} \PYG{n}{i}\PYG{p}{;}
+
+    \PYG{k+kt}{int} \PYG{o}{*}\PYG{n}{idx} \PYG{o}{=} \PYG{p}{(}\PYG{k+kt}{int}\PYG{o}{*}\PYG{p}{)}\PYG{n}{malloc}\PYG{p}{(}\PYG{n}{loop}\PYG{o}{*}\PYG{n}{sizeof}\PYG{p}{(}\PYG{k+kt}{int}\PYG{p}{));}
+    \PYG{k}{for} \PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{loop}\PYG{p}{;} \PYG{n}{i}\PYG{o}{++}\PYG{p}{)} \PYG{n}{idx}\PYG{o}{[}\PYG{n}{i}\PYG{o}{]} \PYG{o}{=} \PYG{n}{rand}\PYG{p}{()}\PYG{o}{\PYGZpc{}}\PYG{n}{n}\PYG{p}{;}
+
+    \PYG{k+kt}{int} \PYG{n}{sum} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+    \PYG{n}{clock\PYGZus{}gettime}\PYG{p}{(}\PYG{n}{CLOCK\PYGZus{}MONOTONIC}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{t\PYGZus{}start}\PYG{p}{);}
+    \PYG{k}{for} \PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{loop}\PYG{p}{;} \PYG{n}{i}\PYG{o}{++}\PYG{p}{)} \PYG{n}{sum} \PYG{o}{+=} \PYG{n}{array}\PYG{o}{[}\PYG{n}{idx}\PYG{o}{[}\PYG{n}{i}\PYG{o}{]]}\PYG{p}{;}
+    \PYG{n}{clock\PYGZus{}gettime}\PYG{p}{(}\PYG{n}{CLOCK\PYGZus{}MONOTONIC}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{t\PYGZus{}stop}\PYG{p}{);}
+    \PYG{k+kt}{long} \PYG{n}{wall} \PYG{o}{=} \PYG{n}{nano\PYGZus{}seconds}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{t\PYGZus{}start}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{t\PYGZus{}stop}\PYG{p}{);}
+    \PYG{k}{return} \PYG{p}{((}\PYG{k+kt}{float}\PYG{p}{)}\PYG{n}{wall}\PYG{o}{/}\PYG{p}{(}\PYG{k+kt}{float}\PYG{p}{)}\PYG{n}{loop}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kt}{int} \PYG{n+nf}{main}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{l+m+mi}{10}\PYG{p}{;} \PYG{n}{i}\PYG{o}{++}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{k+kt}{float} \PYG{n}{wall} \PYG{o}{=} \PYG{n}{bench}\PYG{p}{(}\PYG{l+m+mi}{1000}\PYG{p}{,} \PYG{l+m+mi}{1000}\PYG{p}{);}
+        \PYG{n}{printf}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}\PYGZpc{}d \PYGZbs{}t \PYGZpc{}f \PYGZbs{}n\PYGZdq{}}\PYG{p}{,} \PYG{n}{i}\PYG{p}{,} \PYG{n}{wall}\PYG{p}{);}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
