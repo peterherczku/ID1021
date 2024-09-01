@@ -55,7 +55,7 @@ After looking at the benchmarks, we get the same result: the execution time is 0
 
 Instead, we could perform the operation $n$ times, measure the time it takes to do that, and then divide this value by $n$.
 Additionally, for the access to be random, we need to set up another array with random indexes.
-We should do it before benchmarking the loop, otherwise we would measure the time it takes to generated a random number as well.
+We should do it before benchmarking the loop, otherwise we would measure the time it takes to generate a random number as well.
 
 \begin{minted}{c}
 // ... initialize variables, fill up arrays
@@ -107,7 +107,7 @@ Let's take a closer look at the very beginning of the graph.
 \end{figure}
 
 One can notice that the average execution time is highly affected by the maximum execution time.
-However, the maximum execution time can be arbitrarily large, therefore we can neglect the maximum and average values.
+However, the maximum execution time can be arbitrarily large, since we are running the program on top of an operating system that could prioritize other tasks over ours, therefore we can neglect the maximum and average values.
 The minimum time seems to be consistent in the beginning, but then starts increasing.
 This might be an effect of several factors e.g cache misses.
 
@@ -126,7 +126,8 @@ To find out more information, we can measure the median since it would give us a
 \end{figure}
 
 The conclusion of this graph is that the size of an array actually have an impact on the execution time of a random access in C.
-If we are working with relatively small sizes of an array this difference is negligible, but cannot be on large sizes.
+If we are working with relatively small sizes of an array this difference is negligible, but not on large sizes.
+On the other hand, we can also see that the median and minimum values are pretty close to each other, therefore we can use the minimum time in future benchmarks.
 
 \section*{Search for an item}
 
@@ -145,7 +146,7 @@ Let's run this benchmark with the provided method on different sizes of arrays, 
   \label{fig:graph_4}
 \end{figure}
 The graph clearly shows that as we increase the number of elements in an array the execution time grows linearly as well.
-In other words, the time complexity of this function is {\tt O(n)}.
+In other words, the time complexity of this function is $O(n)$.
 
 \section*{Search for duplicates}
 
@@ -164,10 +165,15 @@ In theory, we iterate through 2 arrays n times, so the complexity should be $O(n
 \end{figure}
 
 Our graph indicates that our theoretical assumption was correct, and we got a quadratic relationship.
-The time complexity of this function is truly $O(n^2)$.
+The time complexity of this function is truly $O(n^2)$, meaning that if the method takes $t$ time for an array with $n$ elements, it takes $4t$ time for an array with $2n$ elements.
 
 \section*{GitHub}
 
 I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-1}{my github repository}, where we can find the code I used to make this report.
+
+\section*{Conclusion}
+
+In conclusion, this was a fun report to write, I have learnt how to set up pipelines for LaTeX projects, and how to use LaTeX in general.
+Seeing time complexities not only theoretically has also helped me to understand it better.
 
 \end{document}
