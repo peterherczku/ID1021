@@ -33,6 +33,7 @@ void push(stack *stk, int val) {
     stk->top = stk->top + 1;
 }
 int pop(stack *stk) {
+    if (stk->top == 0) return 0;
     int returnValue = stk->array[stk->top - 1];
     stk->top = stk->top - 1;
     return returnValue;
