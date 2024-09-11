@@ -11,3 +11,4 @@ main.c
 *.pdf
 *.aux
 *.log
+**/_minted-report/
