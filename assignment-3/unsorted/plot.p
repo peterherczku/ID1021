@@ -1,9 +1,9 @@
 set terminal pdf
-set output './duplicates/data.pdf'
+set output './unsorted/data.pdf'
 
 set title ""
 
 set xlabel "n"
-set ylabel "time in us"
+set ylabel "time in ns"
 
-plot "./duplicates/data.dat" using 1:2 with linespoints title 'Minimum Time'
+plot "./unsorted/data.dat" using 1:2 with linespoints title 'Time'

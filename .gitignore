@@ -5,4 +5,9 @@ report.aux
 report.log
 report.out
 main.c
-a.exe
+*.out
+*.exe
+*.dat
+*.pdf
+*.aux
+*.log
