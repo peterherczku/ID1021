@@ -30,7 +30,7 @@ report.pdf: report.tex ./binary_recursive/data.pdf ./binary_search/data.pdf ./li
 	gcc ./linear_sorted_with_optimization/main.c -lm -o ./linear_sorted_with_optimization/a.out
 
 ./unsorted/data.pdf: ./unsorted/data.dat
-	gnuplot ./binary_recursive/plot.p
+	gnuplot ./unsorted/plot.p
 
 ./unsorted/data.dat: ./unsorted/a.out
 	./unsorted/a.out > ./unsorted/data.dat

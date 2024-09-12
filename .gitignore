@@ -1,10 +1,4 @@
 .idea/
-./_minted-report
-a.exe
-report.aux
-report.log
-report.out
-main.c
 *.out
 *.exe
 *.dat

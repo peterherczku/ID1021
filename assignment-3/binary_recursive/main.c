@@ -57,7 +57,7 @@ void benchmark_binary(int loop) {
             long wall = nano_seconds(&t_start, &t_stop);
             if (wall < min) min = wall;
         }
-        printf("%d\t%0.5f\n", size, (double) min / 10.0);
+        printf("%d\t%0.5f\n", size, (double) min / 100.0);
     }
 }
 
