@@ -11,7 +11,7 @@ report.pdf: report.tex ./binary_recursive/data.pdf ./binary_search/data.pdf ./li
 ./binary_recursive/a.out: ./binary_recursive/main.c
 	gcc ./binary_recursive/main.c -lm -o ./binary_recursive/a.out
 
-./binary_search/data.pdf: ./binary_search/data.dat
+./binary_search/data.pdf: ./binary_search/data.dat ./binary_search/plot.p
 	gnuplot ./binary_search/plot.p
 
 ./binary_search/data.dat: ./binary_search/a.out

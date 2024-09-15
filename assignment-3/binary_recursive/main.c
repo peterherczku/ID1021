@@ -56,6 +56,8 @@ void benchmark_binary(int loop) {
             clock_gettime(CLOCK_MONOTONIC, &t_stop);
             long wall = nano_seconds(&t_start, &t_stop);
             if (wall < min) min = wall;
+            free(array);
+            free(keys);
         }
         printf("%d\t%0.5f\n", size, (double) min / 100.0);
     }

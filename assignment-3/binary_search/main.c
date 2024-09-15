@@ -51,6 +51,26 @@ int *unsorted(int n) {
     return array;
 }
 
+void one_million() {
+    struct timespec t_start, t_stop;
+        int size = 1000000;
+        long min = LONG_MAX;
+        for (int k = 0; k < 5; k++) {
+            int* array = sorted(size);
+            int* keys = unsorted(size*2);
+            clock_gettime(CLOCK_MONOTONIC, &t_start);
+            for(int j = 0; j < 10; j++) {
+                binary_search(array, size, keys[j]);
+            }
+            clock_gettime(CLOCK_MONOTONIC, &t_stop);
+            long wall = nano_seconds(&t_start, &t_stop);
+            if (wall < min) min = wall;
+            free(array);
+            free(keys);
+        }
+        printf("%d\t%0.5f\n", size, (double) min / 10.0);
+}
+
 void benchmark_binary(int loop) {
     struct timespec t_start, t_stop;
     for(int i = 1; i < 50; i++) {
@@ -66,6 +86,8 @@ void benchmark_binary(int loop) {
             clock_gettime(CLOCK_MONOTONIC, &t_stop);
             long wall = nano_seconds(&t_start, &t_stop);
             if (wall < min) min = wall;
+            free(array);
+            free(keys);
         }
         printf("%d\t%0.5f\n", size, (double) min / 100.0);
     }

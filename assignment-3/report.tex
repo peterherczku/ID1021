@@ -28,7 +28,7 @@
 \begin{document}
 
     \title{
-        \textbf{Searching in arrays in C}
+        \textbf{Searching Arrays in C}
     }
     \author{Péter Herczku}
     \date{Fall 2024}
@@ -37,13 +37,13 @@
 
     \section*{Introduction}
 
-    The task is to analyze the time complexity of searching for a key in unsorted and sorted arrays as well as implementing the binary search algorithm.
-    I did the assignment in the C programming language.
+    The task is to analyze the time complexity of searching for a key in unsorted and sorted arrays, as well as implementing the binary search algorithm.
+    I completed the assignment using the C programming language.
 
     \section*{Linear search}
 
-    We start by setting up the benchmark to measure the time it takes to search through an unsorted array.
-    This task is very similar to what we did in the first assignment, therefore we know exactly how to do it.
+    We begin by setting up the benchmark to measure the time it takes to search through an unsorted array.
+    This task is very similar to what we did in the first assignment, so we know how to do it.
 
     \begin{figure}[h]
         \centering
@@ -55,8 +55,11 @@
         \label{fig:graph_1}
     \end{figure}
 
-    As we can see our graph is clearly linear, and the time complexity of the algorithm is $O(n)$.
-    After doing the same benchmark on a sorted array, we do not see any difference.
+    As we can see, the graph is clearly linear, and the time complexity of the algorithm is $O(n)$.
+    After performing the same benchmark on a sorted array, we do not see any difference.
+    Searching through an array with 1 million items should take $1800000 ns$.
+    In fact, after benchmarking, we can see that it takes $1785000 ns$.
+    This is pretty close to our theoretical assumption confirming that this is indeed a linear relationship, even on large arrays.
     Can we do something to improve it?
     Let's discuss it in the next section.
 
@@ -64,7 +67,7 @@
 
     Since we know that the array is sorted, we can return false after we pass an element bigger than our key.
     This extra check prevents the algorithm to keep checking the rest of the array for no reason.
-    After benchmarking, we can clearly see the performance boost we got from this small improvement.
+    After benchmarking, we can clearly observe the performance boost we got from this small improvement.
 
     \begin{figure}[h]
         \centering
@@ -84,11 +87,11 @@
     Binary search is a searching algorithm that can be used on sorted datasets.
     It is highly efficient in terms of speed.
     But how does it work?
-    The key is to take advantage of that we are working with a sorted array.
-    When we look up a value in our array at index $n$, and it doesn't match our key, we can retrieve information: if the value we read is bigger, than our key must be before index $n$, if it is lower, then it must be in the upper half.
+    The key is to take advantage of the fact that we are working with a sorted array.
+    When we look up a value in our array at index $n$, and it doesn't match our key, we can retrieve information: if the value we read is greater than our key, the key must be before index $n$, if it is smaller, then it must be in the upper half.
 
-    Essentially what we are doing is checking if the key is less than the middle element, if it is the search continues in the lower half, otherwise we go to the upper half.
-    We keep doing this over and over again, dividing our interval in half, until we find the key we are looking for or the interval becomes empty, which means  that the array does not contain the key we are looking for.
+    Essentially, we are checking if the key is less than the middle element, if it is the search continues in the lower half, otherwise we go to the upper half.
+    We keep doing this over and over again, dividing our interval in half, until we find the key we are looking for, or the interval becomes empty, indicating that the array does not contain the key we are looking for.
 
     Let's implement this into our code:
 
@@ -125,23 +128,25 @@ return false;
     From the graph, we can clearly see that it is no longer a linear relationship.
     In fact this looks like a logarithmic time complexity.
     It is way more efficient than linear algorithms, allowing us to do operations on larger data sets.
+    Running this algorithm on an array with 1 million items takes $570 ns$.
+    This is a very huge boost compared to our linear algorithm.
 
     \section*{The cost of sorting}
 
     However, we cannot neglect the fact that we are working with sorted datasets.
-    In real life, it is usually not the case, therefore we need to decide if it is worth it to sort the array first.
+    In real life, this is usually not the case, so we need to decide whether it is worth sorting the array first.
     The most efficient sorting algorithm (heapsort, merge sort, etc.) we know of has a time complexity of $O(n*log(n))$, which is quite expensive.
 
     It all depends on our use case: let's say we have a database where we store old cooking recipes.
     It means that we rarely update the database, but often read it.
     In this case, sorting our dataset could be worth it, since we do not have to do it regularly.
-    On the other hand, when we are talking about a dataset that is frequently being updated, and barely read, it would not be worth it.
+    On the other hand, when we are talking about a dataset that is frequently updated but barely read, sorting may not be worth it.
 
     \section*{Recursive binary search}
 
-    Implementing binary search recursively is actually easier than most people think.
-    We can just remove the while loop and invoke the function where we do $continue$.
-    Here is my implementation of it:
+    Implementing binary search recursively is easier than most people think.
+    We can simply remove the while loop and invoke the function where we used $continue$.
+    Here is my implementation:
 
     \begin{minted}{c}
 if (first == last) return false;
@@ -171,6 +176,6 @@ if (array[mid] < key) {
     In this task, there is no clear reason to choose the recursive solution over the other, so let's just stick to the first one.
 
     \section*{GitHub}
-    I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-3}{my github repository}, where we can find the code used to make this report.
+    I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-3}{my github repository}, where you can find the code used to make this report.
 
 \end{document}
