@@ -9,6 +9,14 @@ long nano_seconds(struct timespec *t_start, struct timespec *t_stop) {
            (t_stop->tv_sec - t_start->tv_sec)*1000000000;
 }
 
+void printArray(int* array, int length) {
+    printf("[");
+    for(int i = 0; i < length; i++) {
+        printf("%d,", array[i]);
+    }
+    printf("]\n");
+}
+
 int *unsorted(int n) {
     int *array = (int*)malloc(n*sizeof(int));
     for (int i = 0; i < n ; i++) {
@@ -23,20 +31,43 @@ void swap(int* array, int index1, int index2) {
     array[index1] = temp;
 }
 
-void printArray(int* array, int length) {
-    printf("[");
-    for(int i = 0; i < length; i++) {
-        printf("%d,", array[i]);
+void merge(int* org, int* aux, int lo, int mid, int hi) {
+    for(int i = lo; i <= hi; i++) {
+        aux[i] = org[i];
     }
-    printf("]\n");
-}
+    int i = lo;
+    int j = mid + 1;
 
-void sort(int* array, int n) {
-    for (int i = 1; i < n; i++) {
-        for (int j = i - 1; j >= 0 && array[j] > array[j + 1]; j--) {
-            swap(array, j, j + 1);
+    for (int k = lo; k <= hi; k++) {
+        if(i > mid) {
+            org[k] = aux[j];
+            j++;
+        } else if(j > hi) {
+            org[k] = aux[i];
+            i++;
+        } else if(aux[i] < aux[j]) {
+            org[k] = aux[i];
+            i++;
+        } else {
+            org[k] = aux[j];
+            j++;
         }
     }
+}
+
+void merge_sort(int* org, int* aux, int lo, int hi) {
+    if (lo != hi) {
+        int mid = (lo + hi) / 2;
+        merge_sort(org, aux, lo, mid);
+        merge_sort(org, aux, mid + 1, hi);
+        merge(org, aux, lo, mid, hi);
+    }
+}
+
+void sort(int* org, int n) {
+    if (n == 0) return;
+    int *aux = (int*) malloc(n * sizeof(int));
+    merge_sort(org, aux, 0, n - 1);
 }
 
 void bench(int loop, int max, int steps) {
@@ -58,6 +89,6 @@ void bench(int loop, int max, int steps) {
 }
 
 int main() {
-    bench(40, 25000, 1000);
+    bench(10, 1000000, 25000);
     return 0;
 }

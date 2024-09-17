@@ -35,10 +35,10 @@ void sort(int* array, int length) {
     }
 }
 
-void bench(int loop) {
+void bench(int loop, int max, int steps) {
     struct timespec t_start, t_stop;
-    for(int i = 1; i < 50; i++) {
-        int size = i * 200;
+    for(int i = 1; i < (max / steps); i++) {
+        int size = i * steps;
         long min = LONG_MAX;
         for (int k = 0; k < loop; k++) {
             int* array = unsorted(size);
@@ -49,11 +49,11 @@ void bench(int loop) {
             if (wall < min) min = wall;
             free(array);
         }
-        printf("%d\t%0.5f\n", size, (double) min / 100.0 / 1000.0);
+        printf("%d\t%0.5f\n", size, (double) min / 1000.0);
     }
 }
 
 int main() {
-    bench(20);
-    return 1;
+    bench(40, 25000, 1000);
+    return 0;
 }
