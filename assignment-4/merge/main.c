@@ -68,6 +68,7 @@ void sort(int* org, int n) {
     if (n == 0) return;
     int *aux = (int*) malloc(n * sizeof(int));
     merge_sort(org, aux, 0, n - 1);
+    free(aux);
 }
 
 void bench(int loop, int max, int steps) {
