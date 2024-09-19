@@ -40,6 +40,41 @@
     The task is to analyze the time complexity of different sorting algorithms in particular selection, insertion and merge-sort.
     I completed the assignment using the C programming language.
 
+    \section*{Swapping elements in an array}
+
+    Since we will swap elements in multiple algorithms, it would be convenient to create a {\tt swap} method that does the job for us.
+
+    \begin{minted}{c}
+void swap(int* array, int index1, int index2) {
+    int temp = array[index2];
+    array[index2] = array[index1];
+    array[index1] = temp;
+}
+    \end{minted}
+
+    \section*{Selection sort}
+
+    The simplest sorting algorithm that is pretty straightforward to implement is selection sort.
+    The idea behind it is the following: we start from index 0 and look for the smallest element in the array that is smaller than our value at index 0.
+    We swap them, increment index by one, and we keep doing the same thing until we reach the end of the array.
+    In the worst case, we do $n^2/2$ comparisons, therefore this algorithm should have $O(n^2)$ time complexity.
+    First let's take a look at the implementation of selection sort:
+
+    \begin{minted}{c}
+void sort(int* array, int length) {
+    for (int i = 0; i < length - 1; i++) {
+        int candidate = i;
+        for(int j = i + 1; j < length; j++) {
+            if (array[j] < array[candidate]) {
+                candidate = j;
+            }
+        }
+        swap(array, i, candidate);
+    }
+}
+    \end{minted}
+    Now, let's run some benchmarks to validate our point about the time complexity of selection sort.
+
     \begin{figure}[h]
         \centering
         \begin{subfigure}[b]{.5\textwidth}
@@ -50,6 +85,30 @@
         \label{fig:graph_1}
     \end{figure}
 
+    We can clearly see the quadratic relationship from the graph: if we double the size of the array, the runtime will be multiplied by 4.
+
+    \subsection*{Insertion sort}
+
+    This algorithm is a bit trickier to implement than selection sort, but we still shouldn't have any problems programming it.
+    We start from index 1, and we start going backwards.
+    If the value of the element at the target index is bigger than our value at the current index we swap them.
+    We keep doing this until we reach the beginning of the array, or we reach an element that is smaller than ours.
+    After that, we increment index by one and do the same thing until we reach the end of the array.
+    Now, let's look at the implementation of the function:
+
+    \begin{minted}{c}
+void sort(int* array, int n) {
+    for (int i = 1; i < n; i++) {
+        for (int j = i - 1; j >= 0 && array[j] > array[j + 1]; j--) {
+            swap(array, j, j + 1);
+        }
+    }
+}
+    \end{minted}
+    In the worst case, it should still be an algorithm with $O(n^2)$ time complexity.
+    However, when the array is partially sorted the algorithm should perform better than selection sort, but since we are working with large randomized arrays this is negligible.
+    After running some benchmarks, we get the following result:
+
     \begin{figure}[h]
         \centering
         \begin{subfigure}[b]{.5\textwidth}
@@ -59,6 +118,11 @@
         \caption{Graph of insertion sort}
         \label{fig:graph_2}
     \end{figure}
+
+    We can observe a quadratic relationship from the graph again, but luckily we can do better.
+    Let's discuss it in the next topic.
+
+    \subsection*{Merge sort}
 
     \begin{figure}[h]
         \centering

@@ -45,7 +45,7 @@ void merge(int* org, int* aux, int lo, int mid, int hi) {
         } else if(j > hi) {
             org[k] = aux[i];
             i++;
-        } else if(aux[i] < aux[j]) {
+        } else if(aux[i] <= aux[j]) {
             org[k] = aux[i];
             i++;
         } else {
@@ -76,20 +76,23 @@ void bench(int loop, int max, int steps) {
     for(int i = 1; i < (max / steps); i++) {
         int size = i * steps;
         long min = LONG_MAX;
+        long sum = 0;
         for (int k = 0; k < loop; k++) {
-            int* array = unsorted(size);
             clock_gettime(CLOCK_MONOTONIC, &t_start);
-            sort(array, size);
+            for (int j = 0; j < 10; j++) {
+                int* array = unsorted(size);
+                sort(array, size);
+                free(array);
+            }
             clock_gettime(CLOCK_MONOTONIC, &t_stop);
             long wall = nano_seconds(&t_start, &t_stop);
-            if (wall < min) min = wall;
-            free(array);
+            sum += wall;
         }
-        printf("%d\t%0.5f\n", size, (double) min / 1000.0);
+        printf("%d\t%0.5f\n", size, (double) sum / loop / 10.0 / 1000.0);
     }
 }
 
 int main() {
-    bench(10, 1000000, 25000);
+    bench(40, 25000, 500);
     return 0;
 }
