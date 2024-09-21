@@ -1,5 +1,5 @@
 all: report.pdf
-report.pdf: report.tex ./selection/data.pdf ./insertion/data.pdf ./merge/data.pdf
+report.pdf: report.tex ./selection/data.pdf ./insertion/data.pdf ./merge/data.pdf ./insertion_inline/data.pdf
 	pdflatex -shell-escape report.tex
 
 ./selection/data.pdf: ./selection/data.dat ./selection/plot.p
@@ -19,6 +19,15 @@ report.pdf: report.tex ./selection/data.pdf ./insertion/data.pdf ./merge/data.pd
 
 ./insertion/a.out: ./insertion/main.c
 	gcc ./insertion/main.c -lm -o ./insertion/a.out
+
+./insertion_inline/data.pdf: ./insertion_inline/data.dat ./insertion_inline/plot.p
+	gnuplot ./insertion_inline/plot.p
+
+./insertion_inline/data.dat: ./insertion_inline/a.out
+	./insertion_inline/a.out > ./insertion_inline/data.dat
+
+./insertion_inline/a.out: ./insertion_inline/main.c
+	gcc ./insertion_inline/main.c -lm -o ./insertion_inline/a.out
 
 ./merge/data.pdf: ./merge/data.dat ./merge/plot.p
 	gnuplot ./merge/plot.p

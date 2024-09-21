@@ -33,8 +33,8 @@ void printArray(int* array, int length) {
 
 void sort(int* array, int n) {
     for (int i = 1; i < n; i++) {
-        for (int j = i - 1; j >= 0 && array[j] > array[j + 1]; j--) {
-            swap(array, j, j + 1);
+        for(int j = i; j > 0 && array[j] < array[j - 1]; j--) {
+            swap(array, j, j - 1);
         }
     }
 }
