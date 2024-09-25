@@ -87,7 +87,7 @@ void sort(int* array, int length) {
 
     We can clearly see the quadratic relationship from the graph: if we double the size of the array, the runtime will be multiplied by 4.
 
-    \subsection*{Insertion sort}
+    \section*{Insertion sort}
 
     This algorithm is slightly more complex to implement than selection sort, but we still shouldn't have any problems programming it.
     We start from index 1, and we start going backwards.
@@ -137,7 +137,7 @@ void sort(int* array, int n) {
     Luckily, we can do better.
     Let's discuss it in the next topic.
 
-    \subsection*{Merge sort}
+    \section*{Merge sort}
 
     This algorithm is completely different from the previous ones.
     It's a divide and conquer algorithm, and it divides the array into two halves recursively until each sub array is sorted (contains only one element), then it starts merging them.
@@ -168,7 +168,7 @@ void sort(int* array, int n) {
     It means that when there are two elements in the array that are equal, it doesn't rearrange the order of them.
     This is due to the fact that during the merging phase, we always select elements from the left array first.
 
-    \subsection*{Other algorithms}
+    \section*{Other algorithms}
 
     It is important to know that there are other algorithms that I did not discuss in this report such as Quicksort.
     This is a sorting algorithm with $O(n*log(n))$ time complexity that has better memory efficiency than merge sort.
