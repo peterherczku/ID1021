@@ -14,6 +14,7 @@ typedef struct queue {
     int lastIndex;
     int* array;
     int size;
+    int length;
 } queue;
 
 queue* create_queue() {
@@ -21,6 +22,7 @@ queue* create_queue() {
     q->firstIndex = 0;
     q->lastIndex = 0;
     q->size = 4;
+    q->length = 0;
     q->array = (int*) malloc(sizeof(int)*q->size);
     return q;
 }
@@ -28,6 +30,7 @@ queue* create_queue() {
 void enqueue(queue* q, int value) {
     q->array[q->lastIndex] = value;
     q->lastIndex = (q->lastIndex + 1) % q->size;
+    q->length++;
     if(q->firstIndex == q->lastIndex) {
         int* newArray = (int*) malloc(sizeof(int)*q->size*2);
         int k = 0;
@@ -50,8 +53,10 @@ void enqueue(queue* q, int value) {
 
 int dequeue(queue* q) {
     if(q->firstIndex == q->lastIndex) return -1;
+    q->length--;
     int val = q->array[q->firstIndex];
     q->firstIndex = (q->firstIndex + 1) % q->size;
+
     return val;
 }
 
