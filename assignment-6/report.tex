@@ -35,4 +35,154 @@
 
     \maketitle
 
+    \section*{Introduction}
+
+    The task is to implement the queue structure in two different ways as well as benchmarking its operations.
+    The complete code for the benchmarks can be found at the end of this report.
+
+    I completed the assignment using the C programming language.
+
+    \section*{Queue}
+
+    This data structure has two operations: {\tt enqueue} and {\tt dequeue}.
+    The first object that enters the queue is the first to leave it.
+    Therefore, we call this structure a FIFO, which stands for First In, First Out.
+
+    \section*{Basic implementation}
+
+    The most straightforward implementation of a queue is to use a linked list under the hood.
+    The queue has one property the {\tt head}, which points to the first element in the list.
+    Each element in the list is pointing to a next element except the last node which points to {\tt NULL}.
+
+    There is also another way to implement it, using an array, but that will be discussed in another report.
+
+    \begin{minted}{c}
+typedef struct node {
+    int value;
+    struct node *next;
+} node;
+
+typedef struct queue {
+    node *first;
+} queue;
+    \end{minted}
+
+    \subsection*{Methods}
+
+    Now, let's implement the {\tt enqueue} and {\tt dequeue} methods.
+    In my implementation, the first object that enters the queue is placed at the first position of the linked list, and the last object is placed at the end.
+    Therefore, in the {\tt enqueue} function, we traverse the list to find the last element, then links the new node to the end.
+
+    If the list is empty, we just simply connect the new node to the head.
+    Since our element to be dequeued stands at the beginning of the list, we just need to retrieve the value it holds, then connect the head to the next element the node points to.
+    We need to remember to free the node after dequeue, otherwise we end up with a memory leak.
+
+    \begin{minted}{c}
+void enqueue(queue* q, int v) {
+    node *nd = (node*)malloc(sizeof(node));
+    nd->value = v;
+    nd->next = NULL;
+    node *prv = NULL;
+    node *nxt = q->first;
+    while (nxt != NULL) {
+        prv = nxt;
+        nxt = nxt->next;
+    }
+    if (prv != NULL) {
+        prv->next = nd;
+    } else {
+        q->first = nd;
+    }
+}
+int dequeue(queue *q) {
+    int res = 0;
+    if (q->first != NULL) {
+        res = q->first->value;
+        node* nd = q->first;
+        q->first = nd->next;
+        free(nd);
+    }
+    return res;
+}
+    \end{minted}
+
+    Let's benchmark these operations to see the time complexity for {\tt enqueue} and {\tt dequeue}.
+
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{.5\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{./linked_queue/enqueue} % Adjust width or height as needed
+        \end{subfigure}
+        \caption{Graph of enqueue}
+        \label{fig:graph_1}
+    \end{figure}
+
+    As we can see, enqueueing shows a linear relationship, as we need to traverse the list first to place the new element at the end, therefore the time complexity is $O(n)$.
+    Now let's take a look at our {\tt dequeue} function:
+
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{.5\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{./linked_queue/dequeue} % Adjust width or height as needed
+        \end{subfigure}
+        \caption{Graph of dequeue}
+        \label{fig:graph_2}
+    \end{figure}
+
+    The graph shows a constant relationship, as this method does not depend on the size of the list, since we are only accessing the first element always.
+    Our dequeue function is very effective but our enqueue function is not so.
+    Luckily, we can improve the performance.
+    Let's discuss it in the section.
+
+    \section*{Improved implementation}
+
+    The key idea to improve the performance of the enqueue function is to find a way to access the last element in constant time.
+    We can do this by adding an extra property to our queue that is a pointer to the last element.
+
+    \begin{minted}{c}
+typedef struct queue {
+    node *first;
+    node *last;
+} queue;
+    \end{minted}
+
+    Now we can make some tweaks to our {\tt enqueue function}.
+
+    \begin{minted}{c}
+void enqueue(queue* q, int v) {
+    node *nd = (node*)malloc(sizeof(node));
+    nd->value = v;
+    nd->next = NULL;
+    if (q->last != NULL) {
+        q->last->next = nd;
+    } else {
+        q->first = nd;
+    }
+    q->last = nd;
+}
+    \end{minted}
+
+    If our last element is {\tt NULL}, it means that the list is empty, so we simply connect the head to our new node.
+    If it's not, we dereference the last element and connect the new node to it.
+    Lastly, we update the {\tt last} pointer in the queue to the new node we just enqueued.
+    Let's benchmark this new implementation that, in theory, should give us $O(1)$ time complexity.
+
+    \begin{figure}[h]
+        \centering
+        \begin{subfigure}[b]{.5\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{./linked_improved/enqueue} % Adjust width or height as needed
+        \end{subfigure}
+        \caption{Graph of improved queue}
+        \label{fig:graph_3}
+    \end{figure}
+
+    The graph clearly shows that our method has $O(1)$ time complexity.
+    This implementation is way more efficient than our previous one, and it only needs one more pointer which is basically negligible in terms of memory usage.
+
+    \section*{GitHub}
+    I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-6}{my github repository}, where we can find the code used to make this report.
+
 \end{document}
