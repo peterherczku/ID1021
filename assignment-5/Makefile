@@ -1,6 +1,6 @@
 all: report.pdf
 report.pdf: report.tex ./benchmark/data.pdf ./reverse_append/data.pdf
-	pdflatex -shell-escape report.tex
+	pdflatex -shell-escape ./report.tex
 
 ./benchmark/data.pdf: ./benchmark/data.dat ./benchmark/plot.p
 	gnuplot ./benchmark/plot.p

@@ -35,4 +35,58 @@
 
     \maketitle
 
+    \section*{Introduction}
+
+    The task is to implement the tree data structure as well as its operations.
+    We also needed to investigate the depth first traversal method when printing out our tree in order.
+
+    I completed the assignment using the C programming language.
+
+    \section*{Trees}
+
+    A tree is similar to a linked list but a node can link to more than one nodes.
+    In this assignment we looked at binary trees which means that each node has at most two branches.
+    The reason we call this a tree is because we have a top node which is the root and all the other branches come from that same element.
+    
+    Sorted binary trees require their elements to be comparable. In the assignment I used integers because they satisfy this condition and are easy to work with.
+
+    \subsection*{Methods}
+
+    \begin{itemize}
+        \item \textbf{add(tree* tr, int item)} - adds an element to the tree while keeping it sorted
+        \item \textbf{lookup(tree* tr, int item)} - looks up a node which the value {\tt item}
+     \end{itemize}
+
+     We also need to have methods that create a tree and destroy them. Let's take a look at our implementation now.
+     For the add method we can choose to implement it recursively or not. First, we investigate the recursive approach:
+
+     \begin{minted}{c}
+void add_node(node* nd, int value) {
+    if (nd->value == value) return;
+    if (value < nd->value) {
+        if (nd->left == NULL) {
+            nd->left = construct_node(value);
+        } else {
+            add_node(nd->left, value);
+        }
+    } else {
+        if (nd->right == NULL) {
+            nd->right = construct_node(value);
+        } else {
+            add_node(nd->right, value);
+        }
+    }
+}
+     \end{minted}
+
+     This algorithm the finds the empty spot that is right for our new node, while keeping it sorted.
+     Since the branches of a tree are still trees we can do it recursively, but C cannot recognize that our branches are subtrees, therefore we need to create another method that takes a tree as an argument:
+
+     \begin{minted}{c}
+void add_recursive(tree *tr, int value) {
+    if(tr->root == NULL) tr->root = construct_node(value);
+    else add_node(tr->root, value);
+}
+     \end{minted}
+
 \end{document}

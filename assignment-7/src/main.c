@@ -4,21 +4,12 @@
 #include <limits.h>
 #include <time.h>
 #include <sys/timeb.h>
+#include "stack.h"
 
 long nano_seconds(struct timespec *t_start, struct timespec *t_stop) {
     return (t_stop->tv_nsec - t_start->tv_nsec) +
            (t_stop->tv_sec - t_start->tv_sec)*1000000000;
 }
-
-typedef struct node {
-    int value;
-    struct node *right;
-    struct node *left;
-} node;
-
-typedef struct tree {
-    node *root;
-} tree;
 
 tree* construct_tree() {
         tree *tr = (tree*)malloc(sizeof(tree));
@@ -128,6 +119,44 @@ int* random_values(int size) {
     return arr;
 }
 
+void print(node *nd) {
+    if (nd != NULL) {
+        print(nd->left);
+        printf("%d ", nd->value);
+        print(nd->right);
+    }
+}
+
+void print_tree_new(tree *tr) {
+    stack *stk = new_stack();
+    node *cur = tr->root;
+    
+    while(cur->left != NULL ) {
+        push(stk, cur);
+        cur = cur->left;
+    }
+
+    while(cur != NULL) {
+        printf("%d ", cur->value);
+
+        if(cur->right != NULL) {
+            cur = cur->right;
+            while(cur->left != NULL) {
+                push(stk, cur);
+                cur = cur->left;
+            }
+        } else {
+            cur = pop(stk);
+        }
+    }
+}
+
+void print_tree(tree *tr) {
+      if (tr->root != NULL)
+        print(tr->root);
+      printf("\n");
+}
+
 void bench(int tries, int repeat, int max, int steps) {
     struct timespec t_start, t_stop;
     for(int i = 1; i <= (max / steps); i++) {
@@ -150,5 +179,8 @@ void bench(int tries, int repeat, int max, int steps) {
 }
 
 int main() {
+    stack* st = new_stack();
+    tree* tr = create_tree(100);
+    print_tree_new(tr);
     return 0;
 }
