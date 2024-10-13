@@ -6,6 +6,10 @@
 #include <sys/timeb.h>
 #include "queue.h"
 
+typedef struct sequence {
+    queue* q;
+} sequence;
+
 tree* construct_tree() {
         tree *tr = (tree*)malloc(sizeof(tree));
         tr->root = NULL;
@@ -73,6 +77,23 @@ void bfs(tree* tr) {
     }
 }
 
+
+sequence* create_sequence(tree *tr) {
+    sequence* s = (sequence*)malloc(sizeof(sequence));
+    s->q = create_queue();
+    if(tr->root != NULL) enqueue(s->q, tr->root);
+    return s;
+}
+
+int next(sequence* seq) {
+    if(empty(seq->q)) return -1;
+    tree_node* current = dequeue(seq->q);
+
+    if(current->left != NULL) enqueue(seq->q, current->left);
+    if(current->right != NULL) enqueue(seq->q, current->right);
+    return current->value;
+}
+
 tree* create_tree(int size) {
     tree* tr = construct_tree();
     tree_node* root = construct_node(1);
@@ -96,6 +117,17 @@ tree* create_tree(int size) {
 
 int main() {
     tree* tr = create_tree(1);
-    bfs(tr);
+    sequence* sq = create_sequence(tr);
+    printf("%d ", next(sq));
+    printf("%d ", next(sq));
+    printf("%d ", next(sq));
+    printf("%d ", next(sq));
+    printf("%d ", next(sq));
+    printf("%d ", next(sq));
+    printf("%d ", next(sq));
+    printf("%d ", next(sq));
+        tr->root->left->left->right = construct_node(9);
+    printf("%d ", next(sq));
+    printf("%d ", next(sq));
     return 0;
 }

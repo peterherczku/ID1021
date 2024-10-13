@@ -28,7 +28,7 @@
 \begin{document}
 
     \title{
-        \textbf{Trees in C}
+        \textbf{Breadth-first search in C}
     }
     \author{Péter Herczku}
     \date{Fall 2024}
@@ -37,181 +37,126 @@
 
     \section*{Introduction}
 
-    The task is to implement the tree data structure as well as its operations.
-    We also needed to investigate the depth first traversal method when printing out our tree in order.
-
+    The task is to implement the breadth-first search algorithm. 
     I completed the assignment using the C programming language.
 
-    \section*{Trees}
+    \section*{The idea}
 
-    A tree is similar to a linked list but a node can link to more than one nodes.
-    In this assignment we looked at binary trees which means that each node has at most two branches.
-    The reason we call this a tree is because we have a top node which is the root and all the other branches come from that same element.
+    When we need to traverse a tree that is sorted such that smaller elements are to the left and the larger ones are to the right, the depth first algorithm works just fine.
     
-    Sorted binary trees require their elements to be comparable. In the assignment I used integers because they satisfy this condition and are easy to work with.
+    However, what happens if the tree is sorted differently?
+    Let's say that our tree has the root value 1, to the left it has two and to the right it is linked to three. Two is linked to four and five, and three is linked to six and seven.
+    In this case we cannot use our beloved depth first algorithm, that's why we came up with the idea of breadth-first searching.
 
-    \subsection*{Methods}
+    In the breadth-first algorithm, we traverse the tree one layer at a time.
+    In our example case it means that we first go through the first level which is the root (1), then we proceed to the second layer and read nodes two and three.
+    FInally, we go one level deeper and read the remaining values: 4, 5, 6, and 7.
 
-    \begin{itemize}
-        \item \textbf{add(tree* tr, int item)} - adds an element to the tree while keeping it sorted
-        \item \textbf{lookup(tree* tr, int item)} - looks up a node which the value {\tt item}
-     \end{itemize}
+    This algorithm is simple to imagine but a bit trickier to implement.
+    We can use a queue for the purpose: we begin with an empty queue and we enqueue the root element.
+    Then on each iteration we dequeue an element from the queue, we print it, then enqueue the children of this element.
+    We do this until the queue gets empty.
 
-     We also need to have methods that create a tree and destroy them. Let's take a look at our implementation now.
-     For the add method we can choose to implement it recursively or not. First, we investigate the recursive approach:
-
-     \begin{minted}{c}
-void add_node(node* nd, int value) {
-    if (nd->value == value) return;
-    if (value < nd->value) {
-        if (nd->left == NULL) {
-            nd->left = construct_node(value);
-        } else {
-            add_node(nd->left, value);
-        }
-    } else {
-        if (nd->right == NULL) {
-            nd->right = construct_node(value);
-        } else {
-            add_node(nd->right, value);
-        }
-    }
-}
-     \end{minted}
-
-     This algorithm the finds the empty spot that is right for our new node, while keeping it sorted.
-     Since the branches of a tree are still trees we can do it recursively, but C cannot recognize that our branches are subtrees, therefore we need to create another method that takes a tree as an argument:
-
-     \begin{minted}{c}
-void add_recursive(tree *tr, int value) {
-    if(tr->root == NULL) tr->root = construct_node(value);
-    else add_node(tr->root, value);
-}
-     \end{minted}
-
-    We can also implement this method without recursion.
-    This way, basically the whole functions stays the same but we need to keep track of where we are in the tree, which is our current element.
-    \begin{minted}{c}
-void add(tree *tr, int value) {
-    if(tr->root == NULL) {
-        tr->root = construct_node(value);
-        return;
-    }
-    node *curr = tr->root;
-    while(1) {
-        if(curr->value == value) break;
-        if(value < curr->value) {
-            if (curr->left == NULL) {
-                curr->left = construct_node(value);
-                break;
-            }
-
-            curr = curr->left;
-        }
-        if(value > curr->value) {
-            if (curr->right == NULL) {
-                curr->right = construct_node(value);
-                break;
-            }
-
-            curr = curr->right;
-        }
-    }
-}
-    \end{minted}
-
-
-     Now we can look at the lookup function, which is quite similar to implement: we recursively traverse the tree until we find the value we are looking for.
-     Let's take a look at our implementation:
-     \begin{minted}{c}
-bool lookup(tree *tr, int value) {
-    if(tr->root == NULL) return false;
-    node *curr = tr->root;
-    while(1) {
-        if (curr->value == value) return true;
-        if (value < curr->value && curr->left != NULL) {
-            curr = curr->left;
-        } else if(value > curr->value && curr->right != NULL) {
-            curr = curr->right;
-        } else {
-            return false;
-        }
-    }
-}
-    \end{minted}
-
-    In theory, if we have a balanced tree - so that the two branches from root has the same depth - this algorithm should be $O(log(n))$.
-    The worst case is when our tree looks like a linked list, in that case, the time complexity should be $O(n)$.
-    Let's benchmark and compare our results to our theoretical assumptions:
+    We can first try it using pen and paper to see how the algorithm actually works before jumping into the implementation.
 
     \begin{figure}[H]
         \centering
         \begin{subfigure}[b]{.5\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{./src/data} % Adjust width or height as needed
+            \includegraphics[width=\textwidth]{./picture.jpg} % Adjust width or height as needed
         \end{subfigure}
-        \caption{Graph of lookup}
+        \caption{Picture of experimenting on paper}
         \label{fig:graph_1}
     \end{figure}
 
-    The graph shows linear relationship, which is due to the fact that we are adding the elements after each other from 1 to n, therefore our tree looks like a linked list.
-    
-    The idea behind this method is quite similar to binary search where we basically did the same thing.
-    However, as previously mentioned, the tree is not always balanced therefore this algorithm has worse time complexity compared to binary search.
+    Now that we are familiar with the algorithm we can move on to the actual implementation.
 
-    \section*{Depth first traversal}
+    \section*{The queue}
 
-    In this whole report, we used a sorted tree where the smaller values are to the left, and the bigger ones are to the right.
-    Therefore, if we want to go through the tree in order, we should start looking up the leftmost value first.
-    This approach is called depth first traversal, because we are going down as deep as we can first, in order to traverse the tree.
-    Let's look at our implementation:
+    In the last assignment our queue was holding int values.
+    However, in this case our queue needs to hold node structures, where each node represents an element of the tree.
+    After modfying the code, we obtained the following structure for the queue:
+
     \begin{minted}{c}
- void print(node *nd) {
-    if (nd != NULL) {
-        print(nd->left);
-        printf("%d ", nd->value);
-        print(nd->right);
-    }
-}
+typedef struct queue_node {
+    tree_node* value;
+    struct queue_node *next;
+} queue_node;
 
-void print_tree(tree *tr) {
-      if (tr->root != NULL)
-        print(tr->root);
-      printf("\n");
+typedef struct queue {
+    queue_node *first;
+} queue;        
+    \end{minted}
+
+    I chose the linked list implementation of the queue, because it's a bit easier to manage.
+    Now that we have all the building blocks, we can finally start implementing the breadth first search algorithm.
+
+    \section*{Implementation}
+
+    We have already discussed how the algorithm works in theory, so let's review implementation:
+    \begin{minted}{c}
+void bfs(tree* tr) {
+    queue* q = create_queue();
+    enqueue(q, tr->root);
+    while (!empty(q)) {
+        tree_node* curr = dequeue(q);
+        if(curr == NULL) break;
+        printf("%d ", curr->value);
+        if(curr->left != NULL) enqueue(q, curr->left);
+        if(curr->right != NULL) enqueue(q, curr->right);
+    }
+}  
+    \end{minted}
+
+    It's crucial to enqueue the left element first (if possible) and then the right element.
+    Otherwise, we would get a false order.
+
+    \section*{Sequence}
+
+    The problem with the current implementation is that it traverses the whole tree even when we are only interested in a portion of it.
+    We could create another structure called {\tt sequence}, that would have a method {\tt next}, which would return the next elements one at a time.
+    
+    This is how our sequence structure looks like:
+
+    \begin{minted}{c}
+typedef struct sequence {
+    queue* q;
+} sequence;
+    \end{minted}
+
+    This holds a similar queue to the one used in the breadth-first search method, therefore the implementation of this is quite similar:
+
+    \begin{minted}{c}
+int next(sequence* seq) {
+    if(empty(seq->q)) return -1;
+    tree_node* current = dequeue(seq->q);
+
+    if(current->left != NULL) enqueue(seq->q, current->left);
+    if(current->right != NULL) enqueue(seq->q, current->right);
+    return current->value;
 }
     \end{minted}
 
-    We can also do this without recursion, by using a stack.
-    First, we go down as deep as we can while pushing our nodes onto the stack.
-    Then, when we hit the last element that is to the left, we get this element by popping from the stack and we print it out.
-    Then we check, if it has any elements to the right.
-    If it does, we go there and do the following, but if not, we pop the stack again and print out the next value.
+    We dequeue an element from the queue, store it in a temporary variable, enqueue its children, then return the value of the temporary variable.
+    When the queue is empty, it means that we have gone through every element, and therefore we return an usual value (-1).
+
+    We also need a method that creates a sequence, which could look like this:
+
     \begin{minted}{c}
-stack *stk = new_stack();
-node *cur = tr->root;
-    
-while(cur->left != NULL ) {
-    push(stk, cur);
-    cur = cur->left;
-}
-
-while(cur != NULL) {
-    printf("%d ", cur->value);
-
-    if(cur->right != NULL) {
-        cur = cur->right;
-        while(cur->left != NULL) {
-            push(stk, cur);
-            cur = cur->left;
-        }
-    } else {
-        cur = pop(stk);
-    }
+sequence* create_sequence(tree *tr) {
+    sequence* s = (sequence*)malloc(sizeof(sequence));
+    s->q = create_queue();
+    if(tr->root != NULL) enqueue(s->q, tr->root);
+    return s;
 }
     \end{minted}
 
+    If we add a new element to the tree, but its parent has already been dequeued, then the sequence will not provide us the newly added node.
+    This is because when we dequeued the parent element it means that we had enqueued the children as well, but the new node had not been added.
+    
+    Similarly, if we remove a node that has been already enqueued, the sequence will still provide us the removed node, but as long as we are removing the node before enqueuing it, we're fine.
 
     \section*{GitHub}
-    I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-7}{my github repository}, where we can find the code used to make this report.
+    I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-7-C}{my github repository}, where we can find the code used to make this report.
 
 \end{document}
