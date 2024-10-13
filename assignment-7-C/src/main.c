@@ -4,7 +4,7 @@
 #include <limits.h>
 #include <time.h>
 #include <sys/timeb.h>
-#include "stack.h"
+#include "queue.h"
 
 tree* construct_tree() {
         tree *tr = (tree*)malloc(sizeof(tree));
@@ -12,14 +12,14 @@ tree* construct_tree() {
         return tr;
 }
 
-node *construct_node(int val) {
-    node *nd = (node*)malloc(sizeof(node));
+tree_node* construct_node(int val) {
+    tree_node *nd = (tree_node*)malloc(sizeof(tree_node));
     nd->value = val;
     nd->left = NULL;
     nd->right = NULL;
     return nd;
 }
-void free_node(node *nd) {
+void free_node(tree_node *nd) {
     if (nd != NULL) {
         free_node(nd->right);
         free_node(nd->left);
@@ -39,7 +39,7 @@ void add(tree *tr, int value) {
         tr->root = construct_node(value);
         return;
     }
-    node *curr = tr->root;
+    tree_node *curr = tr->root;
     while(1) {
         if(curr->value == value) break;
         if(value < curr->value) {
@@ -61,32 +61,41 @@ void add(tree *tr, int value) {
     }
 }
 
-bool lookup(tree *tr, int value) {
-    if(tr->root == NULL) return false;
-    node *curr = tr->root;
-    while(1) {
-        if (curr->value == value) return true;
-        if (value < curr->value && curr->left != NULL) {
-            curr = curr->left;
-        } else if(value > curr->value && curr->right != NULL) {
-            curr = curr->right;
-        } else {
-            return false;
-        }
+void bfs(tree* tr) {
+    queue* q = create_queue();
+    enqueue(q, tr->root);
+    while (!empty(q)) {
+        tree_node* curr = dequeue(q);
+        if(curr == NULL) break;
+        printf("%d ", curr->value);
+        if(curr->left != NULL) enqueue(q, curr->left);
+        if(curr->right != NULL) enqueue(q, curr->right);
     }
 }
 
 tree* create_tree(int size) {
     tree* tr = construct_tree();
-    for (int i = 1; i < size + 1; i++) {
-        add(tr, i);
-    }
+    tree_node* root = construct_node(1);
+    tree_node* two = construct_node(2);
+    tree_node* three = construct_node(3);
+    tree_node* four = construct_node(4);
+    tree_node* five = construct_node(5);
+    tree_node* six = construct_node(6);
+    tree_node* seven = construct_node(7);
+    tree_node* eight = construct_node(8);
+    four->left = eight;
+    two->left = four;
+    two->right = five;
+    three->left = six;
+    three->right = seven;
+    root->left = two;
+    root->right = three;
+    tr->root = root;
     return tr;
 }
 
 int main() {
-    stack* st = new_stack();
-    tree* tr = create_tree(100);
-    print_tree_new(tr);
+    tree* tr = create_tree(1);
+    bfs(tr);
     return 0;
 }

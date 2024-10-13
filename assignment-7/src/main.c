@@ -179,8 +179,6 @@ void bench(int tries, int repeat, int max, int steps) {
 }
 
 int main() {
-    stack* st = new_stack();
-    tree* tr = create_tree(100);
-    print_tree_new(tr);
+    bench(20, 100, 25000, 1000);
     return 0;
 }
