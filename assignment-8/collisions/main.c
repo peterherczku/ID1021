@@ -119,7 +119,7 @@ void bench(codes* c) {
 }
 
 int main() {
-    codes* c = read_postcodes("./int_zip/postnummer.csv");
+    codes* c = read_postcodes("./postnummer.csv");
     bench(c);
     return 0;
 }
