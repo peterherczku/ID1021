@@ -127,6 +127,12 @@ void print(node *nd) {
     }
 }
 
+void print_tree(tree *tr) {
+      if (tr->root != NULL)
+        print(tr->root);
+      printf("\n");
+}
+
 void print_tree_new(tree *tr) {
     stack *stk = new_stack();
     node *cur = tr->root;
@@ -149,12 +155,6 @@ void print_tree_new(tree *tr) {
             cur = pop(stk);
         }
     }
-}
-
-void print_tree(tree *tr) {
-      if (tr->root != NULL)
-        print(tr->root);
-      printf("\n");
 }
 
 void bench(int tries, int repeat, int max, int steps) {

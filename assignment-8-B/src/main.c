@@ -199,7 +199,7 @@ static char* text_to_keys(wchar_t* w) {
     int i = 0;
     while(*w != L'\0') {
         //printf("%S", w);
-        printf("%d\n", code((int)*w)/3 + 1);
+        //printf("%d\n", code((int)*w)/3 + 1);
         char c = (char)(code(*w) / 3 + '1');
         text[i] = c;
         i++;
@@ -255,7 +255,7 @@ void collect(node* nd, char* fullKey, wchar_t* sequence, int length, wchar_t** p
             possible_words[*count] = final;
             (*count)++;
         }
-        printf("Returning: %S, (%d)\n", sequence, length);
+        //printf("Returning: %S, (%d)\n", sequence, length);
         return;
     }   
 
@@ -264,7 +264,7 @@ void collect(node* nd, char* fullKey, wchar_t* sequence, int length, wchar_t** p
         int code = idx*3 + i;
         node* branch = nd->next[code];
         if(branch == NULL) {
-            printf("Hit dead end: %S, %d\n", sequence, code);
+           // printf("Hit dead end: %S, %d\n", sequence, code);
             continue;
         }
         wchar_t nextChar = code_to_character(code);
@@ -273,7 +273,7 @@ void collect(node* nd, char* fullKey, wchar_t* sequence, int length, wchar_t** p
             final[i] = sequence[i];
         }
         final[length] = nextChar;
-        printf("Checked: %S, (%d)\n", sequence, length);
+        //printf("Checked: %S, (%d)\n", sequence, length);
         collect(branch, fullKey, final, length + 1, possible_words, count);
     }
 }
@@ -287,9 +287,9 @@ wchar_t** decode(trie* dict, char* key) {
 
 int main() {
     trie* tr = dict();
-    char* keys = text_to_keys(L"ö");
-    printf("%s", keys);
+    char* keys = text_to_keys(L"helvete");
+    //printf("%s", keys);
     wchar_t** results = decode(tr, keys);
-    printf("%ls\n", *(results+1));
+    //printf("%ls\n", *(results+1));
     return 0;
 }
