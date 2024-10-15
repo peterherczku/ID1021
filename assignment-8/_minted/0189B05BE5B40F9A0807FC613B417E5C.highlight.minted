@@ -1,0 +1,7 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{typedef}\PYG{+w}{ }\PYG{k}{struct}\PYG{+w}{ }\PYG{n+nc}{area}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{k+kt}{char}\PYG{+w}{ }\PYG{o}{*}\PYG{n}{zip}\PYG{p}{;}
+\PYG{+w}{  }\PYG{k+kt}{char}\PYG{+w}{ }\PYG{o}{*}\PYG{n}{name}\PYG{p}{;}
+\PYG{+w}{  }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{pop}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{n}{area}\PYG{p}{;}
+\end{MintedVerbatim}

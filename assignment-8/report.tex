@@ -35,4 +35,166 @@
 
     \maketitle
 
+    \section*{Introduction}
+
+    The task is to implement key-value stores and the hash table data structure as well.
+    I completed the assignment using the C programming language
+    
+    \section*{Key-value store}
+
+    In a key-value store, we can retrieve a value by a specific key.
+    This key is unique, therefore two values cannot be accessed by the same key.
+
+    \subsection*{Zip codes}
+
+    Addresses provide an easy way to explore this structure.
+    In this assignment, we were asked to look up different areas based on their zip codes.
+
+    \begin{minted}{c}
+typedef struct area {
+  char *zip;
+  char *name;
+  int pop;
+} area;
+    \end{minted}
+
+    \section*{Straightforward solution}
+
+    Probably the easiest, and most straightforward solution is to have an area struct that holds the zip code as one of its properties, then create an array with all the areas in it and iterate through it to find the area we are looking for.
+    Since the zip code of the area is a string, it would be difficult to use binary search, therefore we are stuck with linear search, which has an $O(n)$ time complexity.
+    
+    Luckily, in Sweden, postal codes contain only numerical characters, therefore we can make the zip code an Integer.
+    This way, we can use binary search.
+    However, even if the array is sorted our algorithm will have an $O(log(n))$ time complexity.
+    Also, when we were comparing two strings we needed to check each character one by one, which slowed down the process.
+    Let's see the results of our benchmarks:
+
+    \begin{table}[H]
+    \begin{center}
+    \begin{tabular}{c|c|c|c}
+    \textbf{Zip code format} & \textbf{Target value} & \textbf{Linear search} & \textbf{Binary search}\\
+    \hline
+        string  &   111 15     &  0.004 us &     Not applicable\\
+        string &    984 99    &  30.12 us &     Not applicable\\
+        integer &    11115    &  0.003 us &     0.06 us\\
+        integer &    98499    &  12.51 us &     0.05 us\\
+    \end{tabular}
+    \caption{Benchmarking results of linear and binary search}
+    \label{tab:table1}
+    \end{center}
+    \end{table}
+
+    We can clearly see the benefit we got from using integers instead of strings, and also the benefit of using binary search.
+    However, we can still improve this.
+    Let's discuss it in the next section.
+
+    \section*{Key as index}
+
+    Since our zip codes are integers, why not use them as indexes?
+    We know that a random lookup in an array, if we know the index, has a time complexity of $O(1)$, therefore this solution would be quite fast.
+    However, if we think about it, we only have 10,000 areas, while the array must be at least 100,000 because we have areas with zip code 98 499.
+    As a result, around 10\% of the memory we allocate for the array would go to waste.
+    After benchmarking this solution, we get blazingly quick results:
+
+    \begin{table}[H]
+        \begin{center}
+        \begin{tabular}{c|c}
+        \textbf{Target value} & \textbf{Runtime}\\
+        \hline
+            111 15     &  0.003 us\\
+            984 99    &  0.003\\
+        \end{tabular}
+        \caption{Benchmarking results of key as index solution}
+        \label{tab:table2}
+        \end{center}
+        \end{table}
+    
+    So how can we avoid this huge waste of memory?
+    The solution is to transform the zip codes into indexes for a smaller array.
+    This is the idea behind hash tables, where we apply a hash function on the key that will give as an index that we can use in the array.
+    However, these hash functions sometimes produce the same hash result for two different keys, but more on this later.
+
+    An easy way to hash a zip code into an index is to use the modulo operation, but we need to find a value where we do not have that many collisions.
+    An entry in the array is called a bucket.
+    The more single-size buckets we have, the better our hash function is.
+    Let's run some benchmarks to find the right number for our use case:
+
+    \begin{table}[H]
+    \begin{center}
+    \begin{tabular}{c|c|c|c}
+    \textbf{Number} & \textbf{Buckets (size 1)} & \textbf{Buckets (size 2)} & \textbf{Buckets (size 3)}\\
+    \hline
+        10000     &  2050   &   1130    & 545\\
+        20000    &  4180    &   1471    & 509\\
+        13513    &  5410    &   1678    & 287\\
+        13600    &  3406    &   1578    & 613\\
+        14000    &  3055    &   1316    & 615\\
+    \end{tabular}
+    \caption{Benchmarking results of modulo selection}
+    \label{tab:table2}
+    \end{center}
+    \end{table}
+
+    We can clearly see that choosing a larger number doesn't necessarily give us better results.
+    The most promising is 13513 where we have the most buckets with size one.
+    
+    Of course, after looking up the bucket, we still need to perform a linear (or binary) search in the bucket, but this solution is considered to be $O(1)$:
+
+    \begin{minted}{c}
+int lookup(codes* c, int postnummer) {
+    bucket b = c->buckets[postnummer % c->size];
+    for(int i = 0; i < b.size; i++) {
+        if(b.areas[i]->zip == postnummer) return 1;
+    }
+    return 0;
+}
+    \end{minted}
+
+    Let's benchmark this solution:
+
+    \begin{table}[H]
+        \begin{center}
+        \begin{tabular}{c|c}
+        \textbf{Target value} & \textbf{Runtime}\\
+        \hline
+            111 15     &  0.007 us\\
+            984 99    &  0.00755 us\\
+        \end{tabular}
+        \caption{Benchmarking results of the bucket-method}
+        \label{tab:table2}
+        \end{center}
+        \end{table}
+
+    As we can see, this approach is sligthly slower compared to our key-as-index method, but it is much better in terms of memory efficiency.
+
+    \section*{A slightly better approach}
+
+    Instead of using buckets, we can first check if the position we got from the hash function is taken or not.
+    If it is, we start going "forward" in the array until the next free position.
+    When we look up a value, we check the position at its hash value, if it's not there, we start moving forward in the array.
+    If we get back to the starting position it means that our value is not in the array.
+    Also, if the array becomes full we cannot add another key-value pair easily, therefore that's problematic as well.
+    
+    This solution can become quite handy if we have a poor hash function, but we can also end up with poor runtime if we are looking for an element that is not in our hash table.
+    Let's benchmark the same operations on this implementation as well:
+
+    \begin{table}[H]
+        \begin{center}
+        \begin{tabular}{c|c}
+        \textbf{Target value} & \textbf{Runtime}\\
+        \hline
+            111 15     &  0.002 us\\
+            984 99    &  0.003 us\\
+        \end{tabular}
+        \caption{Benchmarking results of improved approach}
+        \label{tab:table2}
+        \end{center}
+        \end{table}
+
+    As we can see, in our use-case this solution actually performs better than the bucket method.
+    This is due to our reduced test cases, and the hash function doesn't have that many collisions.
+
+    \section*{GitHub}
+    I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-8}{my github repository}, where we can find the code used to make this report.
+
 \end{document}
