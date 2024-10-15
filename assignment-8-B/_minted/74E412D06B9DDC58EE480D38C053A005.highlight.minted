@@ -1,0 +1,50 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{collect}\PYG{p}{(}\PYG{n}{node}\PYG{o}{*}\PYG{+w}{ }\PYG{n}{nd}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{char}\PYG{o}{*}\PYG{+w}{ }\PYG{n}{fullKey}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{wchar\PYGZus{}t}\PYG{o}{*}\PYG{+w}{ }\PYG{n}{sequence}\PYG{p}{,}
+\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{length}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{wchar\PYGZus{}t}\PYG{o}{*}\PYG{o}{*}\PYG{+w}{ }\PYG{n}{possible\PYGZus{}words}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{o}{*}\PYG{+w}{ }\PYG{n}{count}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// the current key (1, 2 ... 9) we are at right now}
+\PYG{+w}{    }\PYG{k+kt}{char}\PYG{+w}{ }\PYG{n}{key}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{fullKey}\PYG{p}{[}\PYG{n}{length}\PYG{p}{]}\PYG{p}{;}
+\PYG{+w}{    }\PYG{c+c1}{// if the key is \PYGZsq{}\PYGZbs{}0\PYGZsq{}, we have reached the encoded string\PYGZsq{}s end}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{key}\PYG{+w}{ }\PYG{o}{=}\PYG{o}{=}\PYG{+w}{ }\PYG{l+s+sc}{\PYGZsq{}}\PYG{l+s+sc}{\PYGZbs{}0}\PYG{l+s+sc}{\PYGZsq{}}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{c+c1}{// if it\PYGZsq{}s valid, we add a terminating 0 to the end of our decoded string}
+\PYG{+w}{        }\PYG{c+c1}{// and copy it over into a final structure}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{nd}\PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZgt{}}\PYG{n}{valid}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{sequence}\PYG{p}{[}\PYG{n}{length}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+s+sa}{L}\PYG{l+s+sc}{\PYGZsq{}}\PYG{l+s+sc}{\PYGZbs{}0}\PYG{l+s+sc}{\PYGZsq{}}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k+kt}{wchar\PYGZus{}t}\PYG{o}{*}\PYG{+w}{ }\PYG{n}{final}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{wchar\PYGZus{}t}\PYG{o}{*}\PYG{p}{)}\PYG{n}{malloc}\PYG{p}{(}\PYG{k}{sizeof}\PYG{p}{(}\PYG{k+kt}{wchar\PYGZus{}t}\PYG{p}{)}\PYG{o}{*}\PYG{p}{(}\PYG{n}{length}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{o}{=}\PYG{+w}{ }\PYG{n}{length}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{+}\PYG{o}{+}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                }\PYG{n}{final}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{sequence}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{p}{;}
+\PYG{+w}{            }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{            }\PYG{c+c1}{// we also store this final structure in the array where we store}
+\PYG{+w}{            }\PYG{c+c1}{// all the possible combinations}
+\PYG{+w}{            }\PYG{n}{possible\PYGZus{}words}\PYG{p}{[}\PYG{o}{*}\PYG{n}{count}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{final}\PYG{p}{;}
+\PYG{+w}{            }\PYG{c+c1}{// and increment count, so if we found another combination it will}
+\PYG{+w}{            }\PYG{c+c1}{// hold the proper value}
+\PYG{+w}{            }\PYG{p}{(}\PYG{o}{*}\PYG{n}{count}\PYG{p}{)}\PYG{o}{+}\PYG{o}{+}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{k}{return}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{c+c1}{// if its not terminated, we can be sure that the character is a valid key,}
+\PYG{+w}{    }\PYG{c+c1}{// therefore we can turn it into an index}
+\PYG{+w}{    }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{idx}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{key\PYGZus{}to\PYGZus{}index}\PYG{p}{(}\PYG{n}{key}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{    }\PYG{c+c1}{// we examine all possible codes that correcspond to the index}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{l+m+mi}{3}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{+}\PYG{o}{+}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{code}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{idx}\PYG{o}{*}\PYG{l+m+mi}{3}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{i}\PYG{p}{;}
+\PYG{+w}{        }\PYG{n}{node}\PYG{o}{*}\PYG{+w}{ }\PYG{n}{branch}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{nd}\PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZgt{}}\PYG{n}{next}\PYG{p}{[}\PYG{n}{code}\PYG{p}{]}\PYG{p}{;}
+\PYG{+w}{        }\PYG{c+c1}{// if the branch is NULL it means, it\PYGZsq{}s a dead end,}
+\PYG{+w}{        }\PYG{c+c1}{// so we exit the iteration}
+\PYG{+w}{        }\PYG{k}{if}\PYG{p}{(}\PYG{n}{branch}\PYG{+w}{ }\PYG{o}{=}\PYG{o}{=}\PYG{+w}{ }\PYG{n+nb}{NULL}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{continue}\PYG{p}{;}
+\PYG{+w}{        }\PYG{c+c1}{// we decode the code to a wchar\PYGZus{}t character}
+\PYG{+w}{        }\PYG{k+kt}{wchar\PYGZus{}t}\PYG{+w}{ }\PYG{n}{nextChar}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{code\PYGZus{}to\PYGZus{}character}\PYG{p}{(}\PYG{n}{code}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{        }\PYG{c+c1}{// we create a new structure, copy over the current sequence of letters}
+\PYG{+w}{        }\PYG{c+c1}{// and append the new character as well}
+\PYG{+w}{        }\PYG{k+kt}{wchar\PYGZus{}t}\PYG{o}{*}\PYG{+w}{ }\PYG{n}{final}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{wchar\PYGZus{}t}\PYG{o}{*}\PYG{p}{)}\PYG{n}{malloc}\PYG{p}{(}\PYG{k}{sizeof}\PYG{p}{(}\PYG{k+kt}{wchar\PYGZus{}t}\PYG{p}{)}\PYG{o}{*}\PYG{p}{(}\PYG{n}{length}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{o}{=}\PYG{+w}{ }\PYG{n}{length}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{+}\PYG{o}{+}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{final}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{sequence}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{n}{final}\PYG{p}{[}\PYG{n}{length}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{nextChar}\PYG{p}{;}
+\PYG{+w}{        }\PYG{c+c1}{// we call the collect method again, but we increment the length by one,}
+\PYG{+w}{        }\PYG{c+c1}{// so it will examine the next key}
+\PYG{+w}{        }\PYG{n}{collect}\PYG{p}{(}\PYG{n}{branch}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{fullKey}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{final}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{length}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{possible\PYGZus{}words}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{count}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

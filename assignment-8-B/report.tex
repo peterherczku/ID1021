@@ -1,0 +1,206 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{pgfplots}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{soul}
+\hypersetup{
+    colorlinks=true, % Enable colored links
+    linkcolor=black, % Color for internal links
+    urlcolor=black,  % Color for external links
+    citecolor=black, % Color for citation links
+    pdfborder={0 0 0}, % Remove border around links
+}
+\newcommand{\underlinehref}[2]{%
+    \href{#1}{\ul{#2}}%
+}
+\pgfplotsset{compat=1.18}
+
+
+\usepackage{minted}
+
+\begin{document}
+
+    \title{
+        \textbf{T9 in C}
+    }
+    \author{Péter Herczku}
+    \date{Fall 2024}
+
+    \maketitle
+
+    \section*{Introduction}
+
+    The task is to implement the T9 decoder/encoder.
+    I completed the assignment using the C programming language
+
+    \section*{History}
+
+    In the old days when you wanted to send a text message to your friend, you had to use the numpad of your mobile phone.
+    If you pressed the button '1' once, you got an A. 
+    If you pressed it twice you got a B and so on and so fourth.
+    This method was slow, and the T9 system made it easier, as it could guess the words you meant without having to press a button multiple times.
+    You only needed to press the buttons once, and the phone corrected your message.
+    Of course there were mispredictions, but in most cases this algorithm worked well.
+
+    In this report we will be discussing how to implement it in C, for the most common Swedish words.
+
+    \section*{Character encoding}
+
+    In C we can use the {\tt char} type to declare an ASCII character.
+    However, in Swedish, there are three characters that are not in the ASCII character codec: Ö, Å and Ä.
+    Therefore, they are represented in UTF-8, which means we need to include two libraries to handle them: {\tt wchar.h} and {\tt locale.h}.
+    A regular {\tt char} is represented using 1 byte, but these {\tt wchar\_t} type variables are represented using 2 bytes.
+
+    \section*{Dictionary}
+
+    We need to the dictionary from {\tt kelly.txt} into our C program.
+    We create our own character encoding which goes from 0 to 26.
+    Our data structure will be a tree, where each node has 27 branches.
+
+    \begin{minted}{c}
+typedef struct node {
+    bool valid;
+    struct node *next[27];
+} node;
+
+typedef struct trie {
+  node *root;
+} trie;
+    \end{minted}
+
+    When we are adding a word, we split it by its characters and put it in our tree the following way:
+    
+    Let's say we have the word: apple, which is encoded as: 0 15 15 11 4. 
+    This means that the root node has a pointer to a node, where the 15th position points to another node.
+    The 15th position of this new node points to a node where the 11th position points to a node and so on until the 4th position points to a node where {\tt valid = true}.
+    This sounds very complicated, but we could look at it as the word would be represented from top to bottom in the tree.
+    Looking at the code with comments is probably easier to understand.
+
+    We can implement this in C recursively:
+
+    \begin{minted}{c}
+node *add(node *nd, wchar_t *rest) {
+    if (nd == NULL) {
+        // if the node doesn't exist, we create a new
+        // node, where we set  the branches to be NULL
+        nd = (node*)malloc(sizeof(node));
+        for (int i = 0; i < 27; i++ ) {
+            nd->next[i] = NULL;
+        }
+        nd->valid = false;
+    }
+    if (rest[0] == '\n') {
+        // if res[0] == '\n', it means we reached the end
+        // of the string, therefore we can set valid to be true
+        nd->valid = true;
+    } else {
+        // if not, we calculate the code in our own codec,
+        // and go one level deeper while setting up the pointer
+        // to hold the node we return from add
+        int c = code((int)*rest);
+        nd->next[c] = add(nd->next[c], (rest + 1));
+    } 
+    // in the end, we return the node
+    return nd;
+}
+    \end{minted}
+
+    \section*{Utility functions}
+
+    We need to set up some utility functions in order to make our lives easier.
+    We can have a function:
+    \begin{itemize}
+        \item that takes a {\tt wchar\_t } character and encodes it into our own codec
+        \item that takes code and decodes it into a {\tt wchar\_t} character
+        \item that takes key (1, 2 ... 9) and turns it into an index (0, 1 ... 8)
+        \item that a {\tt wchar\_t} character and turns it into a key (1, 2 ... 9)
+     \end{itemize}
+
+     \section*{Decoding}
+
+     Now that we are all set up, we can finally implement the decode algorithm.
+     Since multiple codes can be encoded the same way, we need to return all possible words that could have been encoded.
+     We can do it recursively:
+
+     \begin{minted}{c}
+void collect(node* nd, char* fullKey, wchar_t* sequence,
+ int length, wchar_t** possible_words, int* count) {
+    // the current key (1, 2 ... 9) we are at right now
+    char key = fullKey[length];
+    // if the key is '\0', we have reached the encoded string's end
+    if (key == '\0') {
+        // if it's valid, we add a terminating 0 to the end of our decoded string 
+        // and copy it over into a final structure
+        if (nd->valid) {
+            sequence[length] = L'\0';
+            wchar_t* final = (wchar_t*)malloc(sizeof(wchar_t)*(length + 1));
+            for(int i = 0; i <= length; i++) {
+                final[i] = sequence[i];
+            }
+            // we also store this final structure in the array where we store 
+            // all the possible combinations
+            possible_words[*count] = final;
+            // and increment count, so if we found another combination it will
+            // hold the proper value
+            (*count)++;
+        }
+        return;
+    }   
+
+    // if its not terminated, we can be sure that the character is a valid key,
+    // therefore we can turn it into an index
+    int idx = key_to_index(key);
+    // we examine all possible codes that correcspond to the index
+    for (int i = 0; i < 3; i++) {
+        int code = idx*3 + i;
+        node* branch = nd->next[code];
+        // if the branch is NULL it means, it's a dead end,
+        // so we exit the iteration
+        if(branch == NULL) continue;
+        // we decode the code to a wchar_t character
+        wchar_t nextChar = code_to_character(code);
+        // we create a new structure, copy over the current sequence of letters
+        // and append the new character as well
+        wchar_t* final = (wchar_t*)malloc(sizeof(wchar_t)*(length + 1));
+        for(int i = 0; i <= length; i++) {
+            final[i] = sequence[i];
+        }
+        final[length] = nextChar;
+        // we call the collect method again, but we increment the length by one,
+        // so it will examine the next key
+        collect(branch, fullKey, final, length + 1, possible_words, count);
+    }
+} 
+     \end{minted}
+
+     We also need to create another function, that takes in the original sequence of keys we want to decode:
+
+     \begin{minted}{c}
+wchar_t** decode(trie* dict, char* key) {
+    wchar_t** possible_words = (wchar_t**)malloc(sizeof(wchar_t*)*1000);
+    int count = 0;
+    // we pass the root and a sufficiently big array to hold the results
+    collect(dict->root, key, (wchar_t*)malloc(sizeof(wchar_t)*1), 0, possible_words, &count);
+    return possible_words;
+}
+     \end{minted}
+
+     \section*{Testing}
+
+     We can test the program by checking if it can decode any valid sequence of keys.
+     I created another function that takes a {\tt wchar\_t} string and encodes it.
+     Then we can use the result of this function to decode and see if it matches our original word.
+     After throughoutly testing the program, we can say that it's working properly.
+    
+     \section*{GitHub}
+    I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-8-B}{my github repository}, where we can find the code used to make this report.
+
+
+\end{document}
