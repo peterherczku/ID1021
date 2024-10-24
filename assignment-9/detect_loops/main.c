@@ -84,11 +84,9 @@ map *graph(char *file) {
     if (fptr == NULL)
         return NULL;
 
-    wchar_t ws[BUFFER];
-    while(fgetws(ws, BUFFER, fptr) != NULL) {
-        wchar_t *copy = (wchar_t*) malloc(sizeof(wchar_t) * (wcslen(ws) + 1));
+    wchar_t copy[BUFFER];
+    while(fgetws(copy, BUFFER, fptr) != NULL) {
         wchar_t *cpy;
-        wcscpy(copy, ws);
 
         // divide the copy into the three parts
 
