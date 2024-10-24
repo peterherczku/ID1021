@@ -109,16 +109,42 @@ int loop(city** path, city* city, int k) {
     return 0;
 }
 
-int shortest_improved(city *from, city *to, city** path, int k, int current_length, int* length) {
+int shortest(city *from, city *to, city** path, int k) {
     if (from == to) {
-        if(current_length < *length) *length = current_length;
         return 0;
     }
 
     int sofar = -1;
+
     for (int i = 0; i < from->connections_size; i++) {
         connection *conn = from->connections[i];
-        if(!loop(path, conn->destination, k) && (*length == -1 || current_length < *length)) {
+        if(!loop(path, conn->destination, k)) {
+            path[k] = conn->destination;
+            int d = shortest(conn->destination, to, path, k + 1);
+            //printf("Returneeed\n");
+            if (d >= 0 && ((sofar == -1) || (d + conn->minutes) < sofar)) {
+                sofar = (d + conn->minutes);
+                //printf("Current: %d\n", sofar);
+            }
+        }
+    }
+    return sofar;
+}
+
+int shortest_improved(city *from, city *to, city** path, int k, int current_length, int* length) {
+    if (from == to) {
+        if(*length == -1 || current_length < *length) *length = current_length;
+        return 0;
+    }
+
+    int sofar = -1;
+    if(*length != -1 && current_length > *length) {
+        return sofar;
+    }
+
+    for (int i = 0; i < from->connections_size; i++) {
+        connection *conn = from->connections[i];
+        if(!loop(path, conn->destination, k)) {
             path[k] = conn->destination;
             int d = shortest_improved(conn->destination, to, path, k + 1, current_length + conn->minutes, length);
             //printf("Returneeed\n");
@@ -130,37 +156,6 @@ int shortest_improved(city *from, city *to, city** path, int k, int current_leng
     }
     return sofar;
 }
-
-/*int shortest(city *from, city *to, city **path, int k, int current_length, int *max_so_far) {
-    if (from == to) {
-        // Update max_so_far if we found a shorter path
-        if (*max_so_far == -1 || current_length < *max_so_far) {
-            *max_so_far = current_length;
-        }
-        return current_length;
-    }
-
-    // Prune paths that are not promising
-    if (*max_so_far != -1 && current_length >= *max_so_far) {
-        return -1;
-    }
-
-    int sofar = -1;
-    for (int i = 0; i < from->connections_size; i++) {
-        connection *conn = from->connections[i];
-        if (!loop(path, conn->destination, k)) {
-            path[k] = conn->destination;
-            int new_length = current_length + conn->minutes;
-
-            int d = shortest(conn->destination, to, path, k + 1, new_length, max_so_far);
-
-            if (d >= 0 && (sofar == -1 || d < sofar)) {
-                sofar = d;
-            }
-        }
-    }
-    return sofar;
-}*/
 
 int main(int argc, char*argv[]) {
     setlocale(LC_ALL,"en_US.UTF-8");
@@ -183,7 +178,8 @@ int main(int argc, char*argv[]) {
     clock_gettime(CLOCK_MONOTONIC, &t_start);
     city** path = (city**)malloc(sizeof(city*)*10000);
     int a = -1;
-    int s = shortest_improved(from, to, path, 0, 0, &a);
+    int s = shortest(from, to, path, 0);
+    //int s = shortest_improved(from, to, path, 0, 0, &a);
     clock_gettime(CLOCK_MONOTONIC, &t_stop);
     long wall = nano_seconds(&t_start, &t_stop);
     if (s > 0)
