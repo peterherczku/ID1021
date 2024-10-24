@@ -1,6 +1,7 @@
 #include <wchar.h>
 #include <locale.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 
 typedef struct node {
@@ -224,6 +225,7 @@ node *add(node *nd, wchar_t *rest) {
     } 
     return nd;
 }
+
 
 trie *dict() {
     setlocale(LC_ALL,"en_US.UTF-8");
