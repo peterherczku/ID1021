@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <wchar.h>
 #include <locale.h>
-#include <limits.h>
+#include "utils.h"
 #include <time.h>
 #include <sys/timeb.h>
 
@@ -11,25 +11,8 @@ long nano_seconds(struct timespec *t_start, struct timespec *t_stop) {
            (t_stop->tv_sec - t_start->tv_sec)*1000000000;
 }
 
-int MOD = 500;
+int MOD = 1000;
 int BUFFER = 1024;
-
-typedef struct city {
-    wchar_t* name;
-    struct connection** connections;
-    int connections_size;
-} city;
-
-struct connection {
-    city* destination;
-    int minutes;
-} typedef connection;
-
-struct map {
-    city** cities;
-    int modulo;
-    int size;
-} typedef map;
 
 int hash(wchar_t *name, int mod) {
     int h = 0;
@@ -53,7 +36,7 @@ city* lookup(city** cities, wchar_t* name) {
     }
 
     wchar_t* newName = (wchar_t*) malloc(sizeof(wchar_t)* (wcslen(name) + 1));
-    wcscat(newName, name);
+    wcscpy(newName, name);
     city* c = (city*) malloc(sizeof(city));
     c->name = newName;
     c->connections = (connection**) malloc(sizeof(connection*));
@@ -86,7 +69,7 @@ map *graph(char *file) {
 
     wchar_t copy[BUFFER];
     while(fgetws(copy, BUFFER, fptr) != NULL) {
-        wchar_t *cpy;
+        wchar_t* cpy;
 
         // divide the copy into the three parts
 
@@ -102,64 +85,38 @@ map *graph(char *file) {
     return trains;
 }
 
-int loop(city** path, city* city, int k) {
-    for(int i = 0; i < k; i++) {
-        if(path[i] == city) return 1;
-    }
-    return 0;
-}
+int dijkstra(city* from, city* to, int* doneSize) {
+    priority_queue *queue = create_queue();
+    enqueue(queue, create_path(NULL, from, 0));
 
-int shortest(city *from, city *to, city** path, int k) {
-    if (from == to) {
-        return 0;
-    }
+    dynamic_array* arr = create_array();
 
-    int sofar = -1;
+    while (!is_empty(queue)) {
+        path* p = dequeue(queue);
+        city* c = p->city;
 
-    for (int i = 0; i < from->connections_size; i++) {
-        connection *conn = from->connections[i];
-        if(!loop(path, conn->destination, k)) {
-            path[k] = conn->destination;
-            int d = shortest(conn->destination, to, path, k + 1);
-            //printf("Returneeed\n");
-            if (d >= 0 && ((sofar == -1) || (d + conn->minutes) < sofar)) {
-                sofar = (d + conn->minutes);
-                //printf("Current: %d\n", sofar);
+        if(c == to) return p->distance;
+        if(!contains(arr, c)) {
+            add(arr, c);
+            *(doneSize)+=1;
+
+            for(int i = 0; i < c->connections_size; i++) {
+                connection* conn = c->connections[i];
+                if(contains(arr, conn->destination)) continue;
+                int res = p->distance + conn->minutes;
+                path* newp = create_path(c, conn->destination, res);
+                enqueue(queue, newp);
             }
         }
     }
-    return sofar;
+
+    return -1;
 }
 
-int shortest_improved(city *from, city *to, city** path, int k, int current_length, int* length) {
-    if (from == to) {
-        if(*length == -1 || current_length < *length) *length = current_length;
-        return 0;
-    }
-
-    int sofar = -1;
-    if(*length != -1 && current_length > *length) {
-        return sofar;
-    }
-
-    for (int i = 0; i < from->connections_size; i++) {
-        connection *conn = from->connections[i];
-        if(!loop(path, conn->destination, k)) {
-            path[k] = conn->destination;
-            int d = shortest_improved(conn->destination, to, path, k + 1, current_length + conn->minutes, length);
-            //printf("Returneeed\n");
-            if (d >= 0 && ((sofar == -1) || (d + conn->minutes) < sofar)) {
-                sofar = (d + conn->minutes);
-                //printf("Current: %d\n", sofar);
-            }
-        }
-    }
-    return sofar;
-}
 
 int main(int argc, char*argv[]) {
     setlocale(LC_ALL,"en_US.UTF-8");
-    map *trains = graph("trains.csv");
+    map *trains = graph("europe.csv");
     if(argc < 4) {
         printf("usage: %s <from> <to> <limit>\n", argv[0]);
         exit(1);
@@ -169,21 +126,16 @@ int main(int argc, char*argv[]) {
     mbstowcs(arg1, argv[1], (mbstowcs(NULL, argv[1], 0) + 1));
     mbstowcs(arg2, argv[2], (mbstowcs(NULL, argv[2], 0) + 1));
 
-    printf("%S\n", arg1);
-    printf("%S\n", arg2);
     city *from = lookup(trains->cities, arg1);
     city *to = lookup(trains->cities, arg2);
-    int limit = atoi(argv[3]);
+    int doneSize = 0;
     struct timespec t_start, t_stop;
     clock_gettime(CLOCK_MONOTONIC, &t_start);
-    city** path = (city**)malloc(sizeof(city*)*10000);
-    int a = -1;
-    //int s = shortest(from, to, path, 0);
-    int s = shortest_improved(from, to, path, 0, 0, &a);
+    int s = dijkstra(from, to, &doneSize);
     clock_gettime(CLOCK_MONOTONIC, &t_stop);
     long wall = nano_seconds(&t_start, &t_stop);
     if (s > 0)
-        printf("shortest path %d found in %.2fms\n", s, ((double)wall)/1000000);
+        printf("From: %S to %S, shortest path %d found in %.2fus\tdone: %d\n", arg1, arg2, s, ((double)wall)/1000, doneSize);
     else
-        printf("no path found\n");
+        printf("From: %S to %S, no path found\n", arg1, arg2);
 }

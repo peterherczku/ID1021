@@ -1,0 +1,203 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{pgfplots}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{soul}
+\hypersetup{
+    colorlinks=true, % Enable colored links
+    linkcolor=black, % Color for internal links
+    urlcolor=black,  % Color for external links
+    citecolor=black, % Color for citation links
+    pdfborder={0 0 0}, % Remove border around links
+}
+\newcommand{\underlinehref}[2]{%
+    \href{#1}{\ul{#2}}%
+}
+\pgfplotsset{compat=1.18}
+
+
+\usepackage{minted}
+
+\begin{document}
+
+    \title{
+        \textbf{Graphs in C}
+    }
+    \author{Péter Herczku}
+    \date{Fall 2024}
+
+    \maketitle
+
+    \section*{Introduction}
+
+    The task is to implement the graph data structure and use it to calculate the shortest distance between cities in Sweden.
+
+    I completed the assignment using the C programming language.
+
+    \section*{Graphs}
+
+    A graph is a set of nodes, where the nodes are connected through edges.
+    There are multiple types of graphs such as trees, directed graphs or undirected graphs.
+
+    In this assignment we will use an undirected graph, since if city A has a connection to city B, then city B also has one to city A.
+
+    \section*{Data structures}
+
+    First, we need to create the structures for cities and connections.
+
+    \begin{minted}{c}
+typedef struct city {
+    wchar_t* name;
+    struct connection* connections;
+    int connections_size;
+} city;
+
+struct connection {
+    city* destination;
+    int minutes;
+} typedef connection;
+    \end{minted}
+
+    For the graph, we can use a hash table, where each item is a city stored by the hash value of its name.
+    We can calculate the hash by using the provided function in the description of the assignment.
+
+    \subsection*{Lookup}
+
+    We will also need to define a lookup procedure that will find a city given its name.
+    We previously implemented the lookup method for hash tables in an earlier assignment therefore it will not be discussed in this report.
+    However, if we want to be able to use the lookup procedure when we populate our hashmap we need to make some adjustments: if we cannot find a value, we need to create it and store it in the table:
+
+    \begin{minted}{c}
+city* lookup(city** cities, wchar_t* name) {
+    ...
+    city* c = (city*) malloc(sizeof(city));
+    c->name = newName;
+    c->connections = (connection*) malloc(sizeof(connection));
+    c->connections_size = 0;
+    cities[index] = c;
+    return c;
+}
+    \end{minted}
+
+    \subsection*{About swedish characters}
+
+    We had to modify the skeleton code, because we cannot work with the regular {\tt char} type due to the fact that our file contains special characters which are not supported by char, therefore we needed to modify the functions to handle the {\tt wchar\_t} type.
+    Fortunately, most functions have equivalents for {\tt wchar\_t}.
+
+    \section*{Shortest path between two cities}
+
+    As a first approach we can try depth-first search.
+    However, we need to define a maximum value so our function does not end up in a never ending cycle.
+    We need to have an idea of how long it takes to get to the city when we run the algorithm, because if we set the max value too low we won't find any path.
+    On the other hand, if we set it too high our function will "never" return.
+
+    After completing the skeleton code:
+
+    \begin{minted}{c}
+int shortest(city *from, city *to, int left) {
+    if (from == to) {
+        return 0;
+    }
+    int sofar = -1;
+    for (int i = 0; i < from->connections_size; i++) {
+        connection *conn = from->connections[i];
+        if(conn->minutes <= left) {
+            int d = shortest(conn->destination, to, left - conn->minutes);
+            if (d >= 0 && ((sofar == -1) || (d + conn->minutes) < sofar)) {
+                sofar = (d + conn->minutes);
+            }
+        }
+    }
+    return sofar;
+}
+    \end{minted}
+
+    I had to change it a little bit, because I am using an array, not a linked list.
+    Now let's see some benchmarks.
+
+    \begin{table}[H]
+        \begin{center}
+            \begin{tabular}{c|c|c|c}
+                \textbf{From} & \textbf{To} & \textbf{Distance (min)} & \textbf{Runtime (ms)}\\
+                \hline
+                Malmö  &   Göteborg     &  153 &     0.74\\
+                Göteborg &    Stockholm    &  211 &     0.56\\
+                Malmö &    Stockholm    &  273 &     0.75\\
+                Stockholm &    Sundsvall    &  327 &     18.88\\
+                Stockholm &    Umeå    &  517 &     40048\\
+                Göteborg &    Sundsvall    &  515 &     62771\\
+                Sundsvall &    Umeå    &  190 &     0.01\\
+                Umeå &    Göteborg    &  705 &     2561\\
+            \end{tabular}
+            \caption{Benchmarking depth-first algorithm}
+            \label{tab:table1}
+        \end{center}
+    \end{table}
+
+    As we can see, it performs well for some cases but in general it doesn't have a good time complexity.
+
+    \subsection*{Detect loops}
+    We can get rid of the max-depth, by checking if we are in a loop: if we are we return, if not we can keep iterating.
+    To do this we need to keep track of the current path, which we can pass down recursively in the function.
+    We also need to add another parameter: the length of the current path, so we know at which position we should add the next item.
+
+    \begin{minted}{c}
+int shortest(city *from, city *to, city** path, int k) {
+    ...
+    for (int i = 0; i < from->connections_size; i++) {
+        connection *conn = from->connections[i];
+        if(!loop(path, conn->destination, k)) {
+            path[k] = conn->destination;
+            ...
+        }
+    }
+    ...
+}
+    \end{minted}
+
+    The loop function is just a linear search in {\tt path} for the destination city.
+    Our performance gets better, but we can still improve this.
+
+    \subsection*{Pruning paths}
+
+    If a shorter path has already been found, we can stop exploring the current path and return.
+    We need to keep track of the shortest length in our function as well as the current length.
+    We start by setting the shortest length to be -1, so we know that we haven't found any path yet.
+    After that, when the current length becomes less than the shortest length we update it.
+    After running some benchmarks, we obtain the following results:
+
+    \begin{table}[H]
+        \begin{center}
+            \begin{tabular}{c|c|c|c}
+                \textbf{From} & \textbf{To} & \textbf{Distance (min)} & \textbf{Runtime (ms)}\\
+                \hline
+                Malmö  &   Göteborg     &  153 &     0.04\\
+                Göteborg &    Stockholm    &  211 &     0.04\\
+                Malmö &    Stockholm    &  273 &     0.01\\
+                Stockholm &    Sundsvall    &  327 &     1.15\\
+                Stockholm &    Umeå    &  517 &     3.60\\
+                Göteborg &    Sundsvall    &  515 &     2.23\\
+                Sundsvall &    Umeå    &  190 &     37.84\\
+                Umeå &    Göteborg    &  705 &     0.07\\
+                Göteborg &    Umeå    &  705 &     18.02\\
+            \end{tabular}
+            \caption{Benchmarking the improved algorithm}
+            \label{tab:table2}
+        \end{center}
+    \end{table}
+
+    As we can see our results are much better than before.
+    This method works for the map of Sweden, but it probably won't scale for larger maps.
+
+    \section*{GitHub}
+    I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-9}{my github repository}, where we can find the code used to make this report.
+
+
+\end{document}

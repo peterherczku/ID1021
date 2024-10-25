@@ -3,7 +3,7 @@
 #include <wchar.h>
 #include <locale.h>
 
-int MOD = 500;
+int MOD = 1000;
 int BUFFER = 1024;
 
 typedef struct city {

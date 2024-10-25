@@ -133,8 +133,6 @@ int main(int argc, char*argv[]) {
     mbstowcs(arg1, argv[1], (mbstowcs(NULL, argv[1], 0) + 1));
     mbstowcs(arg2, argv[2], (mbstowcs(NULL, argv[2], 0) + 1));
 
-    printf("%S\n", arg1);
-    printf("%S\n", arg2);
     city *from = lookup(trains->cities, arg1);
     city *to = lookup(trains->cities, arg2);
     int limit = atoi(argv[3]);
@@ -144,7 +142,7 @@ int main(int argc, char*argv[]) {
     clock_gettime(CLOCK_MONOTONIC, &t_stop);
     long wall = nano_seconds(&t_start, &t_stop);
     if (s > 0)
-        printf("shortest path %d found in %.2fms\n", s, ((double)wall)/1000000);
+        printf("From: %S to %S, shortest path %d found in %.2fms\n", arg1, arg2, s, ((double)wall)/1000000);
     else
         printf("no path found\n");
 }

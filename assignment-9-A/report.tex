@@ -1,0 +1,171 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{pgfplots}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{soul}
+\hypersetup{
+    colorlinks=true, % Enable colored links
+    linkcolor=black, % Color for internal links
+    urlcolor=black,  % Color for external links
+    citecolor=black, % Color for citation links
+    pdfborder={0 0 0}, % Remove border around links
+}
+\newcommand{\underlinehref}[2]{%
+    \href{#1}{\ul{#2}}%
+}
+\pgfplotsset{compat=1.18}
+
+
+\usepackage{minted}
+
+\begin{document}
+
+    \title{
+        \textbf{Dijsktra's algorithm in C}
+    }
+    \author{Péter Herczku}
+    \date{Fall 2024}
+
+    \maketitle
+
+    \section*{Introduction}
+
+    The task is to implement Dijkstra's algorithm, and calculate various distances between cities in Europe.
+
+    I completed the assignment using the C programming language.
+
+    \section*{Data structures}
+
+    We will be using the same data structures that we used in the last assignment, however we need to extend them a little.
+    I decided to implement all data structures in a seperate file {\tt utils.c}, so our {\tt main.c} is more readable.
+    We need to add a data structure called {\tt path}, which holds the current stop, the previous stop and the total distance from the origin.
+
+    \begin{minted}{c}
+struct path {
+    city* city;
+    city* previous_stop;
+    int distance;
+} typedef path;
+    \end{minted}
+
+    I have also imported the priority queue and dynamic array data structures which will be useful during the implementation of the algorithm.
+    A priority queue is similar to a queue but when we dequeue, we dequeue the path with the least total distance from the origin.
+
+    \section*{Dijkstra's algorithm}
+
+    We start exploring the root's neighbours and their distances.
+    We enqueue them, and then start exploring the closest unvisited node: we update the shortest known distance to this node (if it's actually shorter than the current one).
+    By repeating this process, we should end up with the shortest path to our destination (or we visit all nodes meaning we couldn't find the destination).
+
+    Now let's see the code:
+
+    \begin{minted}{c}
+int dijkstra(city* from, city* to, int* doneSize) {
+    priority_queue *queue = create_queue();
+    // we enqueue the "root" path
+    enqueue(queue, create_path(NULL, from, 0));
+
+    dynamic_array* arr = create_array();
+
+    while (!is_empty(queue)) {
+        // we dequeue the path with the shortest distance so far
+        path* p = dequeue(queue);
+        city* c = p->city;
+        int hashValue = hash(c->name, MOD);
+
+        // we return the distance when we reach the destination
+        if(c == to) return p->distance;
+        // if we have already visited the node we ignore it
+        if(!contains(arr, hashValue)) {
+            // we add the city to the already visited list
+            add(arr, hashValue);
+            // we increment the amount of the visited nodes
+            *(doneSize)+=1;
+
+            for(int i = 0; i < c->connections_size; i++) {
+                // we iterate through the neighbours of the current city
+                connection* conn = c->connections[i];
+                int connHashValue = hash(conn->destination->name, MOD);
+                // if we have already visited it, we ignore it
+                if(contains(arr, connHashValue)) continue;
+                // if we haven't, we create a new path and enqueue it,
+                // while also incrementing the distance
+                int res = p->distance + conn->minutes;
+                path* newp = create_path(c, conn->destination, res);
+                enqueue(queue, newp);
+            }
+        }
+    }
+
+    // we return -1, if there is no path between the two cities
+    return -1;
+}
+    \end{minted}
+
+    \section*{Benchmarking}
+
+    Let's do the same benchmarks that we did in the previous assignment, so we can compare them:
+
+    \begin{table}[H]
+        \begin{center}
+            \begin{tabular}{c|c|c|c}
+                \textbf{From} & \textbf{To} & \textbf{Visited cities} & \textbf{Runtime (us)}\\
+                \hline
+                Malmö  &   Göteborg     &  19 &     11.10\\
+                Göteborg &    Stockholm    &  37 &     32.90\\
+                Malmö &    Stockholm    &  34 &     36.80\\
+                Stockholm &    Sundsvall    &  49 &     37.50\\
+                Stockholm &    Umeå    &  56 &     42.30\\
+                Göteborg &    Sundsvall    &  56 &     42.90\\
+                Sundsvall &    Umeå    &  3 &     2.40\\
+                Göteborg &    Umeå    &  65 &     64.50\\
+            \end{tabular}
+            \caption{Benchmarking Dijkstra's algorithm}
+            \label{tab:table1}
+        \end{center}
+    \end{table}
+
+    As we can see our runtime is much better (the results are in microseconds) compared to our last attempt.
+    We can even calculate the distance between European cities using this algorithm.
+    Let's benchmark the distance between Budapest and 12 European cities:
+
+    \begin{table}[H]
+        \begin{center}
+            \begin{tabular}{c|c|c}
+                \textbf{To} & \textbf{Visited cities} & \textbf{Runtime (us)}\\
+                \hline
+                Stockholm     &  106 &     128.5\\
+                Barcelona    &  72 &     169.8\\
+                München   &  4 &     405\\
+                Wien    &  1 &     1.00\\
+                Bukarest    &  38 &     41.6\\
+                Paris    &  32 &     40.40\\
+                Berlin    &  14 &     8.7\\
+                London    &  36 &     23.80\\
+                Oslo    &  107 &     95.2\\
+                Amsterdam    &  30 &     19.8\\
+                Bologna    &  35 &     22.90\\
+                Naples    &  52 &     36.40\\
+            \end{tabular}
+            \caption{Benchmarking Dijkstra's algorithm again}
+            \label{tab:table2}
+        \end{center}
+    \end{table}
+
+    As we can see the lest cities we need to visit the better our runtime is.
+    However this is not always true, because the runtime highly depends on our data set.
+    We have much more connections in Sweden than in other countries therefore it impacts the time complexity.
+    It's hard to derive a time complexity for this algorithm due to this factor, but we can be sure that it relates to $n$.
+
+    \section*{GitHub}
+    I have uploaded the full project to \underlinehref{https://github.com/peterherczku/ID1021/tree/main/assignment-9-A}{my github repository}, where we can find the code used to make this report.
+
+
+\end{document}
