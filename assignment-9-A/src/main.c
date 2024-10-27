@@ -117,7 +117,7 @@ int dijkstra(city* from, city* to, int* doneSize) {
 int main(int argc, char*argv[]) {
     setlocale(LC_ALL,"en_US.UTF-8");
     map *trains = graph("europe.csv");
-    if(argc < 4) {
+    if(argc < 3) {
         printf("usage: %s <from> <to> <limit>\n", argv[0]);
         exit(1);
     }

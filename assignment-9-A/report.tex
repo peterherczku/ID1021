@@ -159,9 +159,10 @@ int dijkstra(city* from, city* to, int* doneSize) {
         \end{center}
     \end{table}
 
-    As we can see the lest cities we need to visit the better our runtime is.
-    However this is not always true, because the runtime highly depends on our data set.
-    We have much more connections in Sweden than in other countries therefore it impacts the time complexity.
+    In general, the fewer cities we visit the better our runtime is.
+    However, this is not always true, because the runtime highly depends on our data set.
+    We have much more connections in Sweden than in other countries, increasing runtime.
+    We could say that the time complexity depends on the structure of the graph and its density, rather than the number of cities we have to go through.
     It's hard to derive a time complexity for this algorithm due to this factor, but we can be sure that it relates to $n$.
 
     \section*{GitHub}
